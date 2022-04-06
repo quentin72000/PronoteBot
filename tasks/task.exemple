@@ -1,0 +1,15 @@
+const fs = require('fs');
+module.exports = {
+    run: function () {
+        let {db, client} = require("../index.js")
+        console.log("Running the [taskName] task")
+        const stringjsondb = fs.readFileSync("./db.json")
+        let jsondb = JSON.parse(stringjsondb)
+    },
+    task: {
+        cron: "", // https://crontab.guru
+        // cron: "* * * * *", // testing purpose
+        runOnStartup: false, // if true, the task will be run on startup of the bot
+        name: ""
+    }
+};
