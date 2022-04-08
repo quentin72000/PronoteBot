@@ -2,6 +2,44 @@
 const fs = require('fs');
 require('dotenv').config();
 
+const puppeteerArgs = [
+  '--autoplay-policy=user-gesture-required',
+  '--disable-background-networking',
+  '--disable-background-timer-throttling',
+  '--disable-backgrounding-occluded-windows',
+  '--disable-breakpad',
+  '--disable-client-side-phishing-detection',
+  '--disable-component-update',
+  '--disable-default-apps',
+  '--disable-dev-shm-usage',
+  '--disable-domain-reliability',
+  '--disable-extensions',
+  '--disable-features=AudioServiceOutOfProcess',
+  '--disable-hang-monitor',
+  '--disable-ipc-flooding-protection',
+  '--disable-notifications',
+  '--disable-offer-store-unmasked-wallet-cards',
+  '--disable-popup-blocking',
+  '--disable-print-preview',
+  '--disable-prompt-on-repost',
+  '--disable-renderer-backgrounding',
+  '--disable-setuid-sandbox',
+  '--disable-speech-api',
+  '--disable-sync',
+  '--hide-scrollbars',
+  '--ignore-gpu-blacklist',
+  '--metrics-recording-only',
+  '--mute-audio',
+  '--no-default-browser-check',
+  '--no-first-run',
+  '--no-pings',
+  '--no-sandbox',
+  '--no-zygote',
+  '--password-store=basic',
+  '--use-gl=swiftshader',
+  '--use-mock-keychain',
+];
+
 const puppeteer = require('puppeteer')
 // const puppeteer = require('puppeteer-extra')
 
@@ -22,8 +60,26 @@ module.exports = {
 
 async function login(callback) {
   (async () => {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      headless: false,
+      args: puppeteerArgs
+    });
+
+
     const page = await browser.newPage();
+
+    // optimization part
+
+    await page.setRequestInterception(true);
+
+    //if the page makes a  request to a resource type of image then abort that request
+    page.on('request', request => {
+      if (request.resourceType() === 'image')
+        request.abort();
+      else
+        request.continue();
+    });
+
     console.log('Browser launched ! Going to login')
 
     await page.goto('https://ent.l-educdenormandie.fr/auth/login?callback=%2Fcas%2Flogin%3Fservice%3Dhttps%253A%252F%252F0610056E.index-education.net%252Fpronote%252Feleve.html#/'); // va sur la page de login de l'ent qui redirige sur pronote
@@ -139,9 +195,9 @@ async function getAllData(callback) {
               reponse.notes = value.donneesSec.donnees;
               let jsonreponses = JSON.stringify(reponse)
               fs.writeFileSync("db.json", jsonreponses)
+
               resolve(callback(reponse))
-              page.close()
-              browser.close();
+              await browser.close();
               return;
             } else if (value.nom === "Navigation") {} else {
               await page.$eval('[id="GInterface.Instances[0].Instances[1]_Combo2"]', el => el.click()); // click sur le bouton de login

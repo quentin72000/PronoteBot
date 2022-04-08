@@ -57,15 +57,18 @@ module.exports = {
     task: {
         cron: "*/30 * * * *",
         // cron: "* * * * *", // testing purposes
-        runOnStartup: true,
+        runOnStartup: false,
         name: "updateMoyenne"
     }
 };
 
 function diff(num1, num2) {
     if (num1 > num2) {
-        return num1 - num2
+        let result = num1 - num2
+        return result.toPrecision(2)
     } else {
-        return num2 - num1
+        let result = num2 - num1
+
+        return result.toPrecision(2)
     }
 }
