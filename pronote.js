@@ -57,7 +57,6 @@ module.exports = {
 
 
 
-
 async function login(callback) {
   (async () => {
     const browser = await puppeteer.launch({
@@ -106,7 +105,7 @@ async function login(callback) {
 }
 
 
-async function getMoyenne(callback) { // OBSELETE || DEPRECATED (replaced by getAllData())
+async function getMoyenne(callback) { // ! OBSELETE || DEPRECATED (replaced by getAllData())
   login(async (browser, page) => {
 
     // await page.waitForFunction("document.querySelector('#GInterface\\.Instances[0]\\.Instances[1]_Combo2')")
@@ -130,7 +129,7 @@ async function getMoyenne(callback) { // OBSELETE || DEPRECATED (replaced by get
 
 }
 
-async function checkAbsentProfORCoursAnnule(callback) { // OBSELETE || DEPRECATED (replaced by getAllData())
+async function checkAbsentProfORCoursAnnule(callback) { // ! OBSELETE || DEPRECATED (replaced by getAllData())
   login(async (browser, page) => {
     let result = await page.evaluate(async () => {
 
