@@ -1,6 +1,8 @@
 // const puppeteer = require('puppeteer');
 const fs = require('fs');
 require('dotenv').config();
+const config = require('./config')
+console.log(config.loginURL)
 
 const puppeteerArgs = [
   '--autoplay-policy=user-gesture-required',
@@ -38,6 +40,9 @@ const puppeteerArgs = [
   '--password-store=basic',
   '--use-gl=swiftshader',
   '--use-mock-keychain',
+
+
+  '--disable-web-security'
 ];
 
 const puppeteer = require('puppeteer')
@@ -73,7 +78,17 @@ async function login(callback) {
 
     //if the page makes a  request to a resource type of image then abort that request
     page.on('request', request => {
+      const url = request.url().toLowerCase()
+      const resourceType = request.resourceType()
       if (request.resourceType() === 'image')
+        request.abort();
+      else if (resourceType == 'media' ||
+      url.endsWith('.mp4') ||
+      url.endsWith('.avi') ||
+      url.endsWith('.flv') ||
+      url.endsWith('.mov') ||
+      url.endsWith('.wmv') ||
+      url.includes('youtube.com')) // block youtube embed for fast loading
         request.abort();
       else
         request.continue();
@@ -81,7 +96,7 @@ async function login(callback) {
 
     console.log('Browser launched ! Going to login')
 
-    await page.goto('https://ent.l-educdenormandie.fr/auth/login?callback=%2Fcas%2Flogin%3Fservice%3Dhttps%253A%252F%252F0610056E.index-education.net%252Fpronote%252Feleve.html#/'); // va sur la page de login de l'ent qui redirige sur pronote
+    await page.goto(config.loginURL, {waitUntil: "networkidle2"}); // va sur la page de login de l'ent qui redirige sur pronote
 
 
     // Login
@@ -159,7 +174,6 @@ async function checkAbsentProfORCoursAnnule(callback) { // ! OBSELETE || DEPRECA
     callback(result)
     browser.close()
     console.log('Browser closed.')
-    // console.log(result.absent)
   })
 }
 

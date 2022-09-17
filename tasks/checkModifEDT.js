@@ -1,9 +1,11 @@
 const fs = require('fs');
-const config = require('../config.json')
 const {getAllData} = require('../pronote.js')
+
+let client = require("../index.js")
+let {config} = client;
 module.exports = {
     run: async function () {
-        let {db,client} = require("../index.js")
+        
         console.log("Running the checkModifEDT task")
         const stringjsondb = fs.readFileSync("./db.json")
         let jsondb = JSON.parse(stringjsondb)
@@ -75,7 +77,7 @@ module.exports = {
                     title: `Il y a des changements dans votre EDT du ${date.getDate() + "/" + date.getMonth()}.`,
                     description: `${strings.absent ? "Les profs çi-dessous sont absent : \n" + strings.absent.join(",\n") + "\n\n" : ""}${strings.annule ? "Les cours çi-dessous sont annulé: \n" + strings.annule.join(",\n") + "\n\n" : ""}${strings.deplace ? "Les cours çi-dessous on été deplace et mis aux horaires suivant:\n" + strings.deplace.join(",\n") + "\n\n" : ""}`
                 }]})
-            }
+            } else console.log("No modifEDT")
             // console.log(modifEDT)
         })
             

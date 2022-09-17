@@ -1,27 +1,12 @@
 const fs = require('fs');
 const moment = require('moment');
+
+let client = require("../index.js")
+let {db,config} = client;
+
 module.exports = {
     run: function () {
-        let colors = {
-            "MATHEMATIQUES": "#cc8604", // orange
-            "PHYSIQUE": "#e8f011", // yellow
-            "SCIENCES VIE & TERRE": "#38c219", // green
-            "ANGLAIS LV1": "#ff0000", // red
-            "EDUCATION MUSICALE": "", // yellow,
-            "HISTOIRE-GEOGRAPHIE": "#6974b6", // purple blue
-            "FRANCAIS": "#f5eede", // brun clair
-            "ESPAGNOL LV2": "#94b3bf", // gray blue,
-            "TECHNOLOGIE": "#c0c0c0", //
-            "ED.PHYSIQUE & SPORT.": "#195a46", // black green
-            "ARTS PLASTIQUES": "#408dcc", // blue
-            "VIE DE CLASSE": "#94bfa0", // white green,
-            "default": "#000000" // black
-        }
-        let client = require("../index.js")
-        let {
-            db,
-            config
-        } = client
+
         console.log("Running the checkHomeWork task")
 
         // Reading pronote api output
@@ -35,9 +20,11 @@ module.exports = {
 
 
             // date to timestamp
-            const timestampD = convertDateToTimestamp(value.pourLe.V)
+            var dateD = moment(value.donneLe.V, "DD/MM/YYYY");
+            console.log("D", dateD.format("DD/MM/YYYY"), value.donneLe.V)
 
-            const timestampP = convertDateToTimestamp(value.donneLe.V)
+            var dateP = moment(value.pourLe.V, "DD/MM/YYYY");
+            console.log("P", dateP.format("DD/MM/YYYY"), value.pourLe.V)
 
 
             let description = value.descriptif.V.replaceAll('<div>', '').replaceAll('</div>', '').replaceAll("'", "[q]");
@@ -53,16 +40,16 @@ module.exports = {
                         embeds: [{
                             title: "Travail en " + value.matiere.V.L + " à rendre pour le " + value.pourLe.V,
                             description: decode(description.replaceAll('[q]', "'")),
-                            color: colors[value.matiere.V.L] ? colors[value.matiere.V.L] : colors["default"],
+                            color: config.colors[value.matiere.V.L] ? config.colors[value.matiere.V.L] : config.colors["default"],
                             fields: [{
                                     name: "Donné le ",
-                                    value: `<t:${timestampD}:D>(<t:${timestampD}:R>)`,
-                                    inline: true
+                                    value: `<t:${dateD.unix()}:D>(<t:${dateD.unix()}:R>)`,
+                                    // inline: true
                                 },
                                 {
                                     name: "Pour le",
-                                    value: `<t:${timestampP}:D>(<t:${timestampP}:R>)`,
-                                    inline: true
+                                    value: `<t:${dateP.unix()}:D>(<t:${dateP.unix()}:R>)`,
+                                    // inline: true
                                 },
                                 {
                                     name: "Fichiers: ",
@@ -76,7 +63,7 @@ module.exports = {
                         })
                     })
 
-                } else if (value.TAFFait === true && result.fait === 0) { // si de devoir existe et que le devoir est fait mais n'est pas marqué comme fait dans la db, update la valeur "fait" à 1 (true) et SUPPRIME le message du channel homework
+                } else if ((value.TAFFait === true && result.fait === 0) || dateP.isBefore()) { // si de devoir existe et que le devoir est fait mais n'est pas marqué comme fait dans la db OU que la date pour rendre le devoir est dépassé, update la valeur "fait" à 1 (true) et SUPPRIME le message du channel homework
                     await client.channels.cache.get(config.channels.homework).messages.fetch(result.message_id).then(async (msg) => {
                         msg.delete().then(async () => {
                             await db.run(`UPDATE homework SET fait=1 WHERE id=${result.id}`, (err) => {
@@ -90,15 +77,15 @@ module.exports = {
                         embeds: [{
                             title: "Travail en " + value.matiere.V.L + " à rendre pour le " + value.pourLe.V,
                             description: decode(description.replaceAll("[q]", "'")),
-                            color: colors[value.matiere.V.L] ? colors[value.matiere.V.L] : colors["default"],
+                            color: config.colors[value.matiere.V.L] ? config.colors[value.matiere.V.L] : config.colors["default"],
                             fields: [{
                                     name: "Donné le ",
-                                    value: `<t:${timestampD}:D>(<t:${timestampD}:R>)`,
+                                    value: `<t:${dateD.unix()}:D>(<t:${dateD.unix()}:R>)`,
                                     inline: true
                                 },
                                 {
                                     name: "Pour le",
-                                    value: `<t:${timestampP}:D>(<t:${timestampP}:R>)`,
+                                    value: `<t:${dateP.unix()}:D>(<t:${dateP.unix()}:R>)`,
                                     inline: true
                                 },
                                 {
@@ -130,9 +117,3 @@ function decode(string) {
 
 }
 
-
-function convertDateToTimestamp(string) {
-    var dateMomentObject = moment(string, "DD/MM/YYYY");
-    return dateMomentObject.unix();
-
-}
