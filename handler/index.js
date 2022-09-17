@@ -1,7 +1,6 @@
 const { glob } = require("glob");
 const { promisify } = require("util");
 const { Client } = require("discord.js");
-const { slashCommandGuildId } = require("../config.json");
 
 
 const globPromise = promisify(glob);
@@ -45,7 +44,7 @@ module.exports = async (client) => {
     client.on("ready", async () => {
         // Register for a single guild
         await client.guilds.cache
-            .get(slashCommandGuildId)
+            .get(client.config.slashCommandGuildId)
             .commands.set(arrayOfSlashCommands);
 
         // Register for all the guilds the bot is in

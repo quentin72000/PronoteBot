@@ -1,4 +1,3 @@
-const { whitelist } = require("../../config.json")
 
 module.exports = {
 	name: "shutdown",
@@ -6,7 +5,7 @@ module.exports = {
 	description: "permet d'arrêter le bot",
 	inDev: false,
 	 execute (message, args, config)  {
-      // const whitelist = config.whitelist;
+                const whitelist = message.client.config.whitelist;
 		if(!whitelist.includes(message.author.id)) return;
 		message.delete();
                 if(args[0] === "-c") {

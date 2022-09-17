@@ -1,8 +1,7 @@
-const config = require('../../config.json')
 module.exports = {
 	name: 'eval',
 	run: async (client, message, args) => {
-    if(message.author.id !==  config.owner_id) return;
+    if(message.author.id !==  message.client.config.owner_id) return;
     let content = message.content.split(" ").slice(1).join(" ");
        if (content.includes("config.db")) content.replace("config.db", "NOP");
        if (content.includes("config.token")) content.replace("config.token", "NOP")

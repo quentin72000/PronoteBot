@@ -2,7 +2,6 @@ const {Client, Collection} = require('discord.js')
 require('dotenv').config();
 let pronote = require('./pronote.js')
 let sqlite = require('sqlite3')
-// const config = require('./config.json')
 
 let db = new sqlite.Database('./data.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
 
@@ -15,7 +14,7 @@ module.exports = client; // export client
 // Global Variables
 client.commands = new Collection();
 client.slashCommands = new Collection();
-client.config = require("./config.json");
+client.config = require("./config");
 client.db = db
 
 
