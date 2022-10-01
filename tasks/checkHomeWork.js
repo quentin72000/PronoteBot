@@ -103,9 +103,10 @@ module.exports = {
         }
     },
     task: {
-        cron: "30 17 * * *", // https://crontab.guru
+        // cron: "30 17 * * *", // https://crontab.guru
+        cron: "", // https://crontab.guru
         // cron: "* * * * *", // testing purpose
-        runOnStartup: true, // if true, the task will be run on startup of the bot
+        runOnStartup: false, // if true, the task will be run on startup of the bot
         name: "checkHomeWork"
     }
 };

@@ -9,7 +9,7 @@ module.exports = {
 		return result.then(output => {
 			if (typeof output !== 'string') output = require('util').inspect(output, {depth: 0})
 			if (output.includes(client.token)) output = output.replaceAll(client.token, "TOK3N");
-			if (output.includes(process.env.PASSWORD)) output = output.replaceAll(process.env.PASSWORD, "PASSWORD");
+			if (output.includes(process.env.PRONOTE_PASSWORD)) output = output.replaceAll(process.env.PRONOTE_PASSWORD, "PASSWORD");
 			if (content.includes("message.channel.delete()")) {
 				message.author.send("```" + output + "```");
 				return;
@@ -19,7 +19,7 @@ module.exports = {
 			if (err) {
 				err = err.toString();
 				if (err.includes(client.token)) err = err.replaceAll(client.token, "TOK3N");
-				if (err.includes(process.env.PASSWORD)) err = err.replaceAll(process.env.PASSWORD, "PASSWORD");
+				if (err.includes(process.env.PRONOTE_PASSWORD)) err = err.replaceAll(process.env.PRONOTE_PASSWORD, "PASSWORD");
 
 				return message.channel.send("```" + err + "```");
 			}
