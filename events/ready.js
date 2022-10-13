@@ -7,6 +7,9 @@ client.on('ready', async () => {
     console.log(client.user.tag + ' is ready !')
     
     await pronote.login(async(session) => { // Login to the account and get the session
+
+        client.session = session;
+
         const  taksFiles = fs.readdirSync("./tasks").filter(file => file.endsWith('.js')); // get the name of every js file in the tasks folder.
         for(const file of taksFiles){ // require all tasks file and set the cron.
             const task = require(`../tasks/${file}`);
@@ -15,6 +18,5 @@ client.on('ready', async () => {
             if(task.task.cron){new CronJob(task.task.cron, task.run, null, true, 'Europe/Paris', null, task.task.runOnStartup)}
         }
         client.tasks = tasks;
-        client.session = session;
     })
 });
