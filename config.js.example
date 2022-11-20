@@ -1,18 +1,20 @@
 module.exports = {
 
-    "loginURL":"ent redirect url (by now: https://ent.l-educdenormandie.fr/auth/login?callback=%2Fcas%2Flogin%3Fservice%3Dhttps%253A%252F%252F0610001V.index-education.net%252Fpronote%252Feleve.html#/)",
 
     "owner_id": "Bot owner id (unlock eval command)",
-    "prefix": "Bot prefix for message commands",
-    "slashCommandGuildId": "slash command guild id",
-    "suggId": "channel id for suggestion",
-    "channels": {
-        "homework": "channel id for homework",
-        "moyenne": "channel id for moyenne",
+    prefix: "Bot prefix for message commands",
+    slashCommandGuildId: "slash command guild id",
+    channels: {
+        homework: "channel id for homework",
+        moyenne: "channel id for moyenne",
+        suggId: "channel id for suggestion",
+        timetableChange: "channel id for timetable change",
+        timetable: "channel id for timetable embed channel",
+        timetableMsg: "message id of the embed timetable message"
     },
-    "colors": { // Set colors for each subject in your timetable. It must be the same as what you see in your timetable to work !
+    colors: { // Set colors for each subject in your timetable. The name must be the same as what you see in your timetable to work ! (Will be removed in a next update to use colors that are already defined in Pronote !)   
             "subject name": "#customColor", 
             // "SCIENCES VIE & TERRE": "#38c219", // example
-            "default": "#000000" // default color must be provided ! He will be used for all non-set subject
+            default: "#000000" // default color must be provided ! He will be used for all non-set subject
     }
 }
