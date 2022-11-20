@@ -30,4 +30,12 @@ client.on("interactionCreate", async (interaction) => {
         const command = client.slashCommands.get(interaction.commandName);
         if (command) command.run(client, interaction);
     }
+
+    if(interaction.isButton()){
+        if(interaction.customId === "refresh_timetable"){
+            await interaction.deferReply({ ephemeral: true});
+            await client.tasks["updateTimetable"].run();
+            await interaction.editReply({content: "Refreshed Timetable !", ephemeral: true});
+        }
+    }
 });

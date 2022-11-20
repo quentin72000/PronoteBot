@@ -2,8 +2,10 @@ let client = require("../index.js")
 
 let {db,config} = client;
 
-const { MessageEmbed, Collection } = require('discord.js')
+const { MessageEmbed, Collection, MessageActionRow, MessageButton } = require('discord.js')
+
 const profAbsent = new Collection()
+
 
 
 module.exports = {
@@ -17,8 +19,7 @@ module.exports = {
 
         
 
-        session.timetable(new Date(2022, 9, 20)).then(timetable => {
-
+        session.timetable().then(timetable => {
             // Timetable embed update part
             const embed = new MessageEmbed()
                 .setColor('#0099ff')
@@ -63,7 +64,17 @@ module.exports = {
                     }
             }
             })
-            timetableMsg.edit({ embeds: [embed] })
+
+            const row = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+					.setCustomId('refresh_timetable')
+					.setLabel('Refresh timetable')
+					.setStyle("SECONDARY")
+                    .setEmoji("🔄"),
+			);
+
+            timetableMsg.edit({ embeds: [embed], components: [row] })
         })
 
 
