@@ -15,7 +15,7 @@ async function login(callback) {
     // const session = await pronoteapi.login(url, username, password /*, cas*/ );
     session.setKeepAlive(true);
     if(session.user !== null && session.user != undefined) {
-      console.log("Succesfully logged as " + session.user.name + " in " + session.user.studentClass.name)
+      console.log("Succesfully logged as " + session.user.name + " in " + session.user.studentClass.name + '\n')
       callback(session)
 
     }
