@@ -96,10 +96,10 @@ module.exports = {
                     console.table(modifEDT)
                     for(const value of modifEDT){
                         let alreadyExists = result.some(element => {if(element.date === value.date && element.matiere === value.matiere)return true;
-                            console.log(value.date, element.date)
-                            console.log(value.matiere, element.matiere);
+                            // console.log(value.date, element.date)
+                            // console.log(value.matiere, element.matiere);
                             })
-                            console.log("Already existe ? :", alreadyExists)
+                            // console.log("Already existe ? :", alreadyExists)
     
                             if(value.raison == "absent"){
                                 strings.absent.push(`**${value.prof}** (${value.matiere})`)

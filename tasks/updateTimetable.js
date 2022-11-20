@@ -12,7 +12,6 @@ module.exports = {
         session = client.session
         // Taked from https://github.com/Gamers-geek/PronoteBot/blob/master/events/ready.js
         const timetableChannel = await client.channels.cache.get(config.channels.timetable);
-        console.log(timetableChannel);
         const timetableMsg = await timetableChannel.messages.fetch(config.channels.timetableMsg)
         const absentChannel = client.channels.cache.get(config.channels.timetableChange)
 
@@ -30,7 +29,7 @@ module.exports = {
                 let conditionAbsent = cours.status === "Prof. absent" || cours.status === "Prof./pers. absent"
                 let conditionAnnule = cours.status === "Cours annulé" /*&& cours.hasDuplicate === false*/
                 const coursDate = new Date(cours.from)
-                console.log(cours.status !== "Cours annulé" && cours.hasDuplicate === false);
+                // console.log(cours.status !== "Cours annulé" && cours.hasDuplicate === false);
                 if(cours.status !== "Cours annulé" || cours.hasDuplicate !== true){ // filter duplicates of cours annulé to avoid confusion and false alert
 
                     embed.setTitle(`Emploi du temps du ${coursDate.toLocaleDateString()}`)
@@ -40,7 +39,6 @@ module.exports = {
                     }:t>` }])
                     embed.setTimestamp()
                     embed.setFooter({ text: `Mis à jour le: `})
-                    // console.log(conditionAbsent)
 
                     // Notifications part
 

@@ -15,7 +15,7 @@ module.exports = {
      */
     run: async (client, interaction, args) => {
         let moyenne = await client.session.marks()
-        console.log(moyenne)
+        // console.log(moyenne)
         await interaction.editReply({embeds: [{
             title: "Moyennes",
             fields: [{
