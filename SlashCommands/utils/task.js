@@ -2,7 +2,6 @@ const { Client, CommandInteraction } = require("discord.js");
 // const client = require("../../index.js")
 let fs = require("fs");
 let tasksChoices = []
-console.log()
 const  taksFiles = fs.readdirSync("./tasks").filter(file => file.endsWith('.js')); // get the name of every js file in the tasks folder.
         for(const file of taksFiles){ // require all tasks file and set the cron.
             const task = require(`../../tasks/${file}`);

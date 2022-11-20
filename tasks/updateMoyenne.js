@@ -10,7 +10,7 @@ const {
 
 module.exports = {
     run: async function () {
-
+        
         // m = moyenne générale perso, mc = moyenne de la classe
         let moyennes = await client.session.marks()
         let m = moyennes.averages.student
@@ -22,14 +22,15 @@ module.exports = {
 
             db.all("SELECT * FROM moyenne", async (err, result) => {
                 let global = result.filter(x => x.matiere == "global")[0]
-                console.log("Condition: ",global.moyenne !== m)
+                // console.log("Condition: ",global.moyenne !== m)
                 if (global.moyenne !== m) {
                     if (global.moyenne < m) {
                         checkMoyenneUpdateForMatters(moyennes, async (changes) => {
                             await channel.send({
                                 embeds: [{
                                     title: ":arrow_upper_right: Votre moyenne a augmenté !",
-                                    description: `\`+${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc}${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`
+                                    description: `\`+${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc}${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
+                                    color: 'GREEN'
                                 }],
                                 content: `<@${config.owner_id}>`
                             });
@@ -40,7 +41,9 @@ module.exports = {
                             await channel.send({
                                 embeds: [{
                                     title: ":arrow_lower_right: Votre moyenne a baissé !",
-                                    description: `\`-${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc} ${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`
+                                    description: `\`-${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc} ${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
+                                    color: 'RED'
+
                                 }],
                                 content: `<@${config.owner_id}>`
                             });
@@ -115,7 +118,7 @@ async function checkMoyenneUpdateForMatters(moyennes, callback) {
     let changes = []
     moyennes.subjects.forEach(async (matter) => {
         await db.get(`SELECT * FROM moyenne WHERE matiere = '${matter.name}'`, async (err, data) => {
-            console.table(data)
+            // console.table(data)
             console.table(matter)
             if (err) throw err;
             if (!data) await initializeMatiere()
