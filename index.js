@@ -17,6 +17,7 @@ client.slashCommands = new Collection();
 client.config = require("./config");
 client.db = db
 
+client.pronote = require("./pronote")
 
 client.on("messageCreate", async (message) => {
     if(message.content.startsWith("!refetch"))pronote.getAllData()

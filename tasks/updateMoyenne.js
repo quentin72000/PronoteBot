@@ -1,63 +1,57 @@
-const fs = require('fs');
 let client = require("../index.js");
-let {
-    db,
-    config
-} = client;
-const {
-    getAllData
-} = require('../pronote.js');
+let { db, config } = client;
 
 module.exports = {
     run: async function () {
-        
-        // m = moyenne générale perso, mc = moyenne de la classe
-        let moyennes = await client.session.marks()
-        let m = moyennes.averages.student
-        let mc = moyennes.averages.studentClass
-
         console.log("Running the updateMoyenne task");
-        await initializeMatiere(moyennes, m, mc)
-        let channel = client.channels.cache.get(client.config.channels.moyenne);
 
-            db.all("SELECT * FROM moyenne", async (err, result) => {
-                let global = result.filter(x => x.matiere == "global")[0]
-                // console.log("Condition: ",global.moyenne !== m)
-                if (global.moyenne !== m) {
-                    if (global.moyenne < m) {
-                        checkMoyenneUpdateForMatters(moyennes, async (changes) => {
-                            await channel.send({
-                                embeds: [{
-                                    title: ":arrow_upper_right: Votre moyenne a augmenté !",
-                                    description: `\`+${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc}${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
-                                    color: 'GREEN'
-                                }],
-                                content: `<@${config.owner_id}>`
+        let session = await client.pronote.login()
+        session.marks().then((async(moyennes) => {
+            session.logout()
+
+            // m = moyenne générale perso, mc = moyenne de la classe
+            let m = moyennes.averages.student
+            let mc = moyennes.averages.studentClass
+    
+            await initializeMatiere(moyennes, m, mc)
+            let channel = client.channels.cache.get(client.config.channels.moyenne);
+    
+                db.all("SELECT * FROM moyenne", async (err, result) => {
+                    let global = result.filter(x => x.matiere == "global")[0]
+                    if (global.moyenne !== m) {
+                        if (global.moyenne < m) {
+                            checkMoyenneUpdateForMatters(moyennes, async (changes) => {
+                                await channel.send({
+                                    embeds: [{
+                                        title: ":arrow_upper_right: Votre moyenne a augmenté !",
+                                        description: `\`+${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc}${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
+                                        color: 'GREEN'
+                                    }],
+                                    content: `<@${config.owner_id}>`
+                                });
                             });
+                        }
+                        if (global.moyenne > m) {
+                            checkMoyenneUpdateForMatters(moyennes, async (changes) => {
+                                await channel.send({
+                                    embeds: [{
+                                        title: ":arrow_lower_right: Votre moyenne a baissé !",
+                                        description: `\`-${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc} ${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
+                                        color: 'RED'
+    
+                                    }],
+                                    content: `<@${config.owner_id}>`
+                                });
+                            });
+    
+                        }
+    
+                        await db.run(`UPDATE moyenne SET  moyenne = "${m}", moyenne_classe ="${mc}" WHERE matiere="global"`, (err) => {
+                            if (err) throw err
                         });
                     }
-                    if (global.moyenne > m) {
-                        checkMoyenneUpdateForMatters(moyennes, async (changes) => {
-                            await channel.send({
-                                embeds: [{
-                                    title: ":arrow_lower_right: Votre moyenne a baissé !",
-                                    description: `\`-${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc} ${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
-                                    color: 'RED'
-
-                                }],
-                                content: `<@${config.owner_id}>`
-                            });
-                        });
-
-                    }
-
-                    await db.run(`UPDATE moyenne SET  moyenne = "${m}", moyenne_classe ="${mc}" WHERE matiere="global"`, (err) => {
-                        if (err) throw err
-                    });
-                }
-            })
-        
-
+                })
+        }))
 
     },
     task: {

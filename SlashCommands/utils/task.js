@@ -34,7 +34,7 @@ module.exports = {
                 color: "#FF0000"
             }]})
         }
-        await client.tasks[args[0]].run()
+        client.tasks[args[0]].run()
         interaction.editReply("La tache a bien été lancée.")
     }
 };

@@ -1,11 +1,4 @@
-const {
-    Client,
-    CommandInteraction
-} = require("discord.js");
-const {
-    PronoteSession
-} = require("pronote-api")
-// const moment = require("moment");
+const { Client, CommandInteraction } = require("discord.js");
 module.exports = {
     name: "menu",
     description: "Renvoie le menu du jour.",
@@ -18,30 +11,33 @@ module.exports = {
      */
     run: async (client, interaction, args) => {
         let embed = {}
-        let menu = await client.session.menu()
-        if (!menu[0]) {
-            embed = {
-                title: "Aucun menu disponible aujourd'hui",
-                color: "red"
-            }
-        } else {
-            
-            embed = {
-                title: "Menu du " + new Date(menu[0].date).toLocaleDateString("fr"),
-                description: ""
-            }
-
-            menu[0].meals[0].forEach((value) => {
-                value.forEach((item) =>{
-                    embed.description += item.name + '\n'
+        let session = await client.pronote.login()
+        session.menu().then(async(menu) => {
+            if (!menu[0]) {
+                embed = {
+                    title: "Aucun menu disponible aujourd'hui",
+                    color: "RED"
+                }
+            } else {
+                
+                embed = {
+                    title: "Menu du " + new Date(menu[0].date).toLocaleDateString("fr"),
+                    description: ""
+                }
+    
+                menu[0].meals[0].forEach((value) => {
+                    value.forEach((item) =>{
+                        embed.description += item.name + '\n'
+                    })
+                    embed.description += "\n"
+    
                 })
-                embed.description += "\n"
-
-            })
-        }
-
-        await interaction.editReply({
-            embeds: [embed]
-        });
+            }
+    
+            await interaction.editReply({
+                embeds: [embed]
+            });
+        })
+       
     }
 };

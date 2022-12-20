@@ -14,19 +14,23 @@ module.exports = {
      * @param {String[]} args
      */
     run: async (client, interaction, args) => {
-        let moyenne = await client.session.marks()
-        // console.log(moyenne)
-        await interaction.editReply({embeds: [{
-            title: "Moyennes",
-            fields: [{
-                name: "Moyenne de l'élève",
-                value: moyenne.averages.student + "/20"
-            },
-            { 
-                name: "Moyenne de la classe",
-                value: moyenne.averages.studentClass + "/20"            }
-        ]
-        }]})
+        let session = await client.pronote.login()
+        session.marks().then(async(moyenne)=>{
+            session.logout()
+
+            await interaction.editReply({embeds: [{
+                title: "Moyennes",
+                fields: [{
+                    name: "Moyenne de l'élève",
+                    value: moyenne.averages.student + "/20"
+                },
+                { 
+                    name: "Moyenne de la classe",
+                    value: moyenne.averages.studentClass + "/20"            }
+            ]
+            }]})
+        })
+        
 
   
 

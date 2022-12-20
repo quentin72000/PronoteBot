@@ -8,59 +8,56 @@ module.exports = {
     run: async function () {
 
         console.log("Running the checkHomeWork task")
-
+        let session = await client.pronote.login()
         // Reading pronote api output
-        let homeworks = await client.session.homeworks(new Date(), parseToDate()) // get homeworks for the next 30 days
+        session.homeworks(new Date(), parseToDate()).then(async(homeworks) => { // get homeworks for the next 30 days
+            session.logout()
+            for (let i = 0; i < homeworks.length; i++) {
+                const value = homeworks[i];
 
-        for (let i = 0; i < homeworks.length; i++) {
-            const value = homeworks[i];
+                // date to timestamp
+                var givenDate = moment(value.givenAt);
+                var dueDate = moment(value.for);
 
-
-            // date to timestamp
-            var givenDate = moment(value.giventAt);
-            // console.log("D", givenDate.format("DD/MM/YYYY") )
-
-            var dueDate = moment(value.for);
-            // console.log("P", dueDate.format("DD/MM/YYYY"))
-
-
-            let description = value.description.replaceAll('"', '""').replaceAll("'", "''")
-            
-            db.get(`SELECT * FROM homework WHERE id='${value.id}'`, async (err, result) => {
-                if (err) console.error(err)
-                if (!result) { // si le devoir n'est pas dans la db, continuez
-                    console.log("Adding a new homework to db...")
-                    await client.channels.cache.get(config.channels.homework).send({
-                        embeds: [getEmbed(value, dueDate, givenDate)]
-                    }).then(async (msg) => {
-                        await db.run(`INSERT INTO homework (id, matiere, description, date_rendue, date_donne, fait, message_id) VALUES ('${value.id}', '${value.subject}', '${description}', '${value.for}', '${value.givenAt}', 0, ${msg.id})`, (err) => {
-                            if (err) console.error(err)
-                        })
-                    })
-
-                } else if ((value.done === true && result.fait === 0) || dueDate.isBefore()) { // si de devoir existe et que le devoir est fait mais n'est pas marqué comme fait dans la db OU que la date pour rendre le devoir est dépassé, update la valeur "fait" à 1 (true) et SUPPRIME le message du channel homework
-                    await client.channels.cache.get(config.channels.homework).messages.fetch(result.message_id).then(async (msg) => {
-                        msg.delete().then(async () => {
-                            await db.run(`UPDATE homework SET fait=1 WHERE id=${result.id}`, (err) => {
+                let description = value.description.replaceAll('"', '""').replaceAll("'", "''")
+                
+            await db.get(`SELECT * FROM homework WHERE id="${value.id}"`, async (err, result) => {
+                    // console.log(result);
+                    if (err) console.error(err)
+                    if (!result) { // si le devoir n'est pas dans la db, continuez
+                        console.log("Adding a new homework to db...")
+                        await client.channels.cache.get(config.channels.homework).send({
+                            embeds: [getEmbed(value, dueDate, givenDate)]
+                        }).then(async (msg) => {
+                            await db.run(`INSERT INTO homework (id, matiere, description, date_rendue, date_donne, fait, message_id) VALUES ('${value.id}', '${value.subject}', '${description}', '${value.for.toISOString()}', '${value.givenAt.toISOString()}', 0, ${msg.id})`, (err) => {
                                 if (err) console.error(err)
                             })
                         })
-                    })
 
-                } else if (value.done === false && result.fait === 1) { // si le devoir est marqué dans la DB comme fait alors qu'il ne l'est pas sur pronote, repostez le message et remetre la valeur fait à 0 (false) dans la DB.
-                    await client.channels.cache.get(client.config.channels.homework).send({
-                        embeds: [getEmbed(value, dueDate, givenDate)]
-                    }).then(async (msg) => {
-                        await db.run(`UPDATE homework SET fait=0, message_id=${msg.id} WHERE id='${value.id}'`)
-                    })
-                }
+                    } else if ((value.done === true && result.fait === 0) || dueDate.isBefore()) { // si de devoir existe et que le devoir est fait mais n'est pas marqué comme fait dans la db OU que la date pour rendre le devoir est dépassé, update la valeur "fait" à 1 (true) et SUPPRIME le message du channel homework
+                        await client.channels.cache.get(config.channels.homework).messages.fetch(result.message_id).then(async (msg) => {
+                            msg.delete().then(async () => {
+                                await db.run(`UPDATE homework SET fait=1 WHERE id=${result.id}`, (err) => {
+                                    if (err) console.error(err)
+                                })
+                            })
+                        })
 
-            })
-        }
+                    } else if (value.done === false && result.fait === 1) { // si le devoir est marqué dans la DB comme fait alors qu'il ne l'est pas sur pronote, repostez le message et remetre la valeur fait à 0 (false) dans la DB.
+                        await client.channels.cache.get(client.config.channels.homework).send({
+                            embeds: [getEmbed(value, dueDate, givenDate)]
+                        }).then(async (msg) => {
+                            await db.run(`UPDATE homework SET fait=0, message_id=${msg.id} WHERE id='${value.id}'`)
+                        })
+                    }
+
+                })
+            }
+        }) 
+        
     },
     task: {
-        // cron: "30 17 * * *", // https://crontab.guru
-        cron: "", // https://crontab.guru
+        cron: "*/10 * * * *", // https://crontab.guru
         // cron: "* * * * *", // testing purpose
         runOnStartup: true, // if true, the task will be run on startup of the bot
         name: "checkHomeWork"
@@ -92,7 +89,7 @@ function getEmbed(homework, dueDate, givenDate){
     return {
         title: "Travail en " + homework.subject + " à rendre pour le " + dueDate.format("DD/MM/YYYY"),
         description: homework.description,
-        color: homework.color,
+        color: config.colors[homework.subject] ? config.colors[homework.subjet] : homework.color,
         fields: [{
                 name: "Donné le ",
                 value: `<t:${givenDate.unix()}:D>(<t:${givenDate.unix()}:R>)`,

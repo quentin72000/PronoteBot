@@ -20,14 +20,15 @@ module.exports = {
      * @param {String[]} args
      */
     run: async (client, interaction, args) => {
+        let session = await client.pronote.login()
         if (args[0] === "version") {
-            return interaction.editReply("Version du serveur pronote: " + client.session.params.version)
+            return interaction.editReply("Version du serveur pronote: " + session.params.version)
         } else if (args[0] === "etablisement") {
 
 
             let embeds = []
 
-            client.session.user.establishmentsInfo.forEach(etablisement => {
+            session.user.establishmentsInfo.forEach(etablisement => {
                 let adresses = []
                 etablisement.address.forEach(element => { // Loop the establishment array
                     if(element.length !== 0) adresses.push(element)
@@ -46,5 +47,6 @@ module.exports = {
                 embeds: embeds
             })
         }
+        session.logout()
     }
 }

@@ -11,8 +11,8 @@ const profAbsent = new Collection()
 module.exports = {
     run: async function () {
         console.log("Running the updateTimetable task")
-        session = client.session
-        // Taked from https://github.com/Gamers-geek/PronoteBot/blob/master/events/ready.js
+        let session = await client.pronote.login()
+        // Taked from https://github.com/Gamers-gee k/PronoteBot/blob/master/events/ready.js
         const timetableChannel = await client.channels.cache.get(config.channels.timetable);
         const timetableMsg = await timetableChannel.messages.fetch(config.channels.timetableMsg)
         const absentChannel = client.channels.cache.get(config.channels.timetableChange)
@@ -20,6 +20,8 @@ module.exports = {
         
 
         session.timetable().then(timetable => {
+            session.logout()
+            
             // Timetable embed update part
             const embed = new MessageEmbed()
                 .setColor('#0099ff')
