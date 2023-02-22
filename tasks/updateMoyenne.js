@@ -3,11 +3,13 @@ let { db, config } = client;
 
 module.exports = {
     run: async function () {
-        console.log("Running the updateMoyenne task");
+        let taskName = "updateMoyenne"
+
+        console.log(`Running the ${taskName} task.`)
 
         let session = await client.pronote.login()
         session.marks().then((async(moyennes) => {
-            session.logout()
+            await client.pronote.logout(session, taskName)
 
             // m = moyenne générale perso, mc = moyenne de la classe
             let m = moyennes.averages.student

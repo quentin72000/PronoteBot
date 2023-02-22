@@ -43,10 +43,10 @@ module.exports = {
                 })
             })
 
-            return interaction.editReply({
+            interaction.editReply({
                 embeds: embeds
             })
         }
-        session.logout()
+        await client.pronote.logout(session, "/pronote")
     }
 }

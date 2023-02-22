@@ -13,6 +13,7 @@ module.exports = {
         let embed = {}
         let session = await client.pronote.login()
         session.menu().then(async(menu) => {
+            await client.pronote.logout(session, "/menu")
             if (!menu[0]) {
                 embed = {
                     title: "Aucun menu disponible aujourd'hui",

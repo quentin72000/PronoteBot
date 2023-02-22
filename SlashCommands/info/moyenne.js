@@ -16,7 +16,7 @@ module.exports = {
     run: async (client, interaction, args) => {
         let session = await client.pronote.login()
         session.marks().then(async(moyenne)=>{
-            session.logout()
+            await client.pronote.logout(session, "/moyenne")
 
             await interaction.editReply({embeds: [{
                 title: "Moyennes",
@@ -30,10 +30,5 @@ module.exports = {
             ]
             }]})
         })
-        
-
-  
-
-
     }
 }

@@ -10,17 +10,19 @@ const profAbsent = new Collection()
 
 module.exports = {
     run: async function () {
-        console.log("Running the updateTimetable task")
+        let taskName = "updateTimetable"
+
+        console.log(`Running the ${taskName} task.`)
         let session = await client.pronote.login()
-        // Taked from https://github.com/Gamers-gee k/PronoteBot/blob/master/events/ready.js
+        // Taked from https://github.com/Gamers-geek/PronoteBot/blob/master/events/ready.js
         const timetableChannel = await client.channels.cache.get(config.channels.timetable);
         const timetableMsg = await timetableChannel.messages.fetch(config.channels.timetableMsg)
         const absentChannel = client.channels.cache.get(config.channels.timetableChange)
 
         
 
-        session.timetable().then(timetable => {
-            session.logout()
+        session.timetable().then(async(timetable) => {
+            await client.pronote.logout(session, taskName)
             
             // Timetable embed update part
             const embed = new MessageEmbed()
