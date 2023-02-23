@@ -36,7 +36,7 @@ async function homeworks(session, user, from = new Date(), to = null)
             done: homework.done,
             color: homework.color,
             files: homework.files.map(f => withId({ name: f.name, url: getFileURL(session, f) }, ['name']))
-        }, 'subject', 'givenAt'));
+        }, ['subject', 'givenAt']));
     }
 
     return checkDuplicates(result).sort((a, b) => a.for - b.for);
