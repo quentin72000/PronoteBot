@@ -1,7 +1,7 @@
 const client = require("../index");
-let pronote = require("../pronote.js")
 let fs = require("fs")
 const CronJob = require('cron').CronJob;
+
 client.on('ready', async () => {
     let tasks = {}
     console.log(client.user.tag + ' is ready !')

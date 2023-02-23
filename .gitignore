@@ -126,7 +126,7 @@ dist
 # End of https://www.toptal.com/developers/gitignore/api/node
 
 test.js
-db.json
+
 *.db
 package-lock.json
 
