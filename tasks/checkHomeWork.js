@@ -22,7 +22,7 @@ module.exports = {
         let from = new Date();
         let to = new Date(from.getFullYear(), from.getMonth() + 1, from.getDate());
 
-        session.homeworks(from, to).then(async(homeworks) => { // get homeworks for the next 30 days
+        await session.homeworks(from, to).then(async(homeworks) => { // get homeworks for the next 30 days
             for (let i = 0; i < homeworks.length; i++) {
                 const value = homeworks[i];
                 // date to timestamp
@@ -70,7 +70,7 @@ module.exports = {
                 })
             }
         }) 
-        // client.pronote.logout(session, taskName) // Loging out at the end because files can't be access if session is closed.
+        client.pronote.logout(session, taskName) // Loging out at the end because files can't be access if session is closed.
     },
     task: {
         cron: "*/10 * * * *", // https://crontab.guru

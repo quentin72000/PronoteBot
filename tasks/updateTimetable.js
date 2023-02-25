@@ -14,14 +14,16 @@ module.exports = {
 
         console.log(`Running the ${taskName} task.`)
         let session = await client.pronote.login()
+
         // Taked from https://github.com/Gamers-geek/PronoteBot/blob/master/events/ready.js
+
         const timetableChannel = await client.channels.cache.get(config.channels.timetable);
         const timetableMsg = await timetableChannel.messages.fetch(config.channels.timetableMsg)
         const absentChannel = client.channels.cache.get(config.channels.timetableChange)
 
-        
 
-        session.timetable().then(async(timetable) => {
+        await session.timetable(new Date(2023, 1, 27)).then(async(timetable) => {
+            console.log(timetable);
             await client.pronote.logout(session, taskName)
             
             // Timetable embed update part
