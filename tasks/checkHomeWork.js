@@ -22,7 +22,7 @@ module.exports = {
         let from = new Date();
         let to = new Date(from.getFullYear(), from.getMonth() + 1, from.getDate());
 
-        session.homeworks(from, to).then(async(homeworks) => { // get homeworks for the next 30 days
+        await session.homeworks(from, to).then(async(homeworks) => { // get homeworks for the next 30 days
             for (let i = 0; i < homeworks.length; i++) {
                 const value = homeworks[i];
                 // date to timestamp
@@ -37,7 +37,6 @@ module.exports = {
                     if (!result) { // si le devoir n'est pas dans la db, continuez
                         console.log("Adding a new homework to db...")
                         await getEmbed(value, dueDate, givenDate).then(async(embed)=> {
-                            console.log(embed);
                             await client.channels.cache.get(config.channels.homework).send(embed).then(async (msg) => {
                                 await db.run(`INSERT INTO homework (id, matiere, description, date_rendue, date_donne, fait, message_id) VALUES ('${value.id}', '${value.subject}', '${description}', '${value.for.toISOString()}', '${value.givenAt.toISOString()}', 0, ${msg.id})`, (err) => {
                                     if (err) console.error(err)
@@ -59,7 +58,6 @@ module.exports = {
 
                     } else if (value.done === false && result.fait === 1) { // si le devoir est marqué dans la DB comme fait alors qu'il ne l'est pas sur pronote, repostez le message et remetre la valeur fait à 0 (false) dans la DB.
                         await getEmbed(value, dueDate, givenDate).then(async(embed) => {
-                            console.log(2);
                             await client.channels.cache.get(client.config.channels.homework).send(embed).then(async (msg) => {
                                 await db.run(`UPDATE homework SET fait=0, message_id=${msg.id} WHERE id='${value.id}'`)
                             })
@@ -70,7 +68,7 @@ module.exports = {
                 })
             }
         }) 
-        // client.pronote.logout(session, taskName) // Loging out at the end because files can't be access if session is closed.
+        client.pronote.logout(session, taskName) // Loging out at the end because files can't be access if session is closed.
     },
     task: {
         cron: "*/10 * * * *", // https://crontab.guru

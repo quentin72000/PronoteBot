@@ -8,7 +8,7 @@ module.exports = {
         console.log(`Running the ${taskName} task.`)
 
         let session = await client.pronote.login()
-        session.marks().then((async(moyennes) => {
+        await session.marks().then((async(moyennes) => {
             await client.pronote.logout(session, taskName)
 
             // m = moyenne générale perso, mc = moyenne de la classe
