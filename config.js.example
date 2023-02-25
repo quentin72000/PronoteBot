@@ -12,9 +12,8 @@ module.exports = {
         timetable: "channel id for timetable embed channel",
         timetableMsg: "message id of the embed timetable message"
     },
-    colors: { // Set colors for each subject in your timetable. The name must be the same as what you see in your timetable to work ! (Will be removed in a next update to use colors that are already defined in Pronote !)   
+    colors: { // Bypass default color of a subject if you don't like or is confusing. The name must be the same as what you see in your timetable to work !
             "subject name": "#customColor", 
             // "SCIENCES VIE & TERRE": "#38c219", // example
-            default: "#000000" // default color must be provided ! He will be used for all non-set subject
     }
 }

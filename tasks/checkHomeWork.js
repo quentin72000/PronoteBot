@@ -127,7 +127,7 @@ async function getEmbed(homework, dueDate, givenDate) {
                 embeds: [{
                     title: "Travail en " + homework.subject + " à rendre pour le " + dueDate.format("DD/MM/YYYY"),
                     description: homework.description ? homework.description : "",
-                    color: config.colors[homework.subject] ? config.colors[homework.subjet] : homework.color,
+                    color: config.colors[homework.subject] ? config.colors[homework.subject] : homework.color,
                     fields: [{
                             name: "Donné le ",
                             value: `<t:${givenDate.unix()}:D>(<t:${givenDate.unix()}:R>)`,
