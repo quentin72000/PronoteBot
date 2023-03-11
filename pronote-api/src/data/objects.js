@@ -1,4 +1,4 @@
-function fromPronote({ N, L, G, ...obj } = {}, fn = null, gName = 'type') {
+function fromPronote({ N, L, G, url, ...obj } = {}, fn = null, gName = 'type') {
     const result = {};
 
     if (typeof fn === 'string') {
@@ -14,6 +14,10 @@ function fromPronote({ N, L, G, ...obj } = {}, fn = null, gName = 'type') {
     }
     if (G !== undefined && gName) {
         result[gName] = G;
+    }
+
+    if(url){
+        result.link = url
     }
 
     return {

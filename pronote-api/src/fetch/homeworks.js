@@ -35,7 +35,7 @@ async function homeworks(session, user, from = new Date(), to = null)
             for: homework.for,
             done: homework.done,
             color: homework.color,
-            files: homework.files.map(f => withId({ name: f.name, url: getFileURL(session, f) }, ['name']))
+            files: homework.files.map(f => withId({ name: f.name, url: f.link ? f.link : getFileURL(session, f) }, ['name']))
         }, ['subject', 'givenAt']));
     }
 

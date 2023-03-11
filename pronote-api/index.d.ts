@@ -1316,7 +1316,7 @@ export interface File extends Identifiable
     name: string,
 
     /**
-     * URL directe du fichier
+     * URL directe du fichier OU du lien (fix by quentin72000)
      */
     url: string
 }
