@@ -1,7 +1,9 @@
 const fs = require('fs');
 const moment = require('moment');
-const axios = require('axios'); 
+
 const path = require('path');
+const url = require('url');
+
 
 
 let client = require("../index.js")
@@ -9,7 +11,7 @@ let {db,config} = client;
 
 
 
-const { MessageAttachment, Message, MessageEmbed } = require('discord.js');
+const { MessageAttachment} = require('discord.js');
 
 
 module.exports = {
@@ -25,8 +27,7 @@ module.exports = {
         await session.homeworks(from, to).then(async(homeworks) => { // get homeworks for the next 30 days
             for (let i = 0; i < homeworks.length; i++) {
                 const value = homeworks[i];
-                // date to timestamp
-                var givenDate = moment(value.givenAt);
+
                 var dueDate = moment(value.for);
 
                 let description = value.description.replaceAll('"', '""').replaceAll("'", "''") // Prevent non escaped caracter error.
@@ -36,7 +37,7 @@ module.exports = {
 
                     if (!result) { // si le devoir n'est pas dans la db, continuez
                         console.log("Adding a new homework to db...")
-                        await getEmbed(value, dueDate, givenDate).then(async(embed)=> {
+                        await getEmbed(value).then(async(embed)=> {
                             await client.channels.cache.get(config.channels.homework).send(embed).then(async (msg) => {
                                 await db.run(`INSERT INTO homework (id, matiere, description, date_rendue, date_donne, fait, message_id) VALUES ('${value.id}', '${value.subject}', '${description}', '${value.for.toISOString()}', '${value.givenAt.toISOString()}', 0, ${msg.id})`, (err) => {
                                     if (err) console.error(err)
@@ -50,14 +51,14 @@ module.exports = {
                     } else if ((value.done === true && result.fait === 0) || dueDate.isBefore()) { // si de devoir existe et que le devoir est fait mais n'est pas marqué comme fait dans la db OU que la date pour rendre le devoir est dépassé, update la valeur "fait" à 1 (true) et SUPPRIME le message du channel homework
                         await client.channels.cache.get(config.channels.homework).messages.fetch(result.message_id).then(async (msg) => {
                             msg.delete().then(async () => {
-                                await db.run(`UPDATE homework SET fait=1 WHERE id=${result.id}`, (err) => {
+                                await db.run(`UPDATE homework SET fait=1 WHERE id="${result.id}"`, (err) => {
                                     if (err) console.error(err)
                                 })
                             })
                         })
 
                     } else if (value.done === false && result.fait === 1) { // si le devoir est marqué dans la DB comme fait alors qu'il ne l'est pas sur pronote, repostez le message et remetre la valeur fait à 0 (false) dans la DB.
-                        await getEmbed(value, dueDate, givenDate).then(async(embed) => {
+                        await getEmbed(value).then(async(embed) => {
                             await client.channels.cache.get(client.config.channels.homework).send(embed).then(async (msg) => {
                                 await db.run(`UPDATE homework SET fait=0, message_id=${msg.id} WHERE id='${value.id}'`)
                             })
@@ -82,50 +83,46 @@ module.exports = {
 
 
 async function parseFiles(files) {
+    let result = {
+        files: [],
+        parsedLinks: ""
+    };
+    let links = [];
     
-    
-    let promise = files.map(async (file) => {
-        let ext = path.parse(file.url).ext
-        if(ext.split("?")[0] !== ""){ // Check if the file is a file (end with an extension).
-            return {file:new MessageAttachment(file.url, file.name)}
-        } else { // If the "file" is not a file, it's a link: get the destination of the links as pronote give only a temporarly link.
-            try {
-                let response = await axios.get(file.url) 
-                const destinationLink = response.request.res.responseUrl;
-                return {link:`[${file.name}](${destinationLink})`}
-            } catch (error) {
-                console.error(error)
-            }
-        }
-        
+    files.forEach(async (file) => {
+        if(isAFileURL(file.url)){ // Check if the attachment is a file.
+            result.files.push(new MessageAttachment(file.url, file.name))
+        } else { // If the attachment is not a file, it's a link, parse it to discord
+            if(!file.name) links.push(`[${file.url}](${file.url})`) 
+            else links.push(`[${file.name}](${file.url})`)     
+        } 
     })
-    let parsedFiles = []
-    let links = []
-    let parsedLinks;
+    result.parsedLinks = links.join("\n") // Join all the links in one string
 
-    await Promise.all(promise).then((results) => { // -> Make the program for the axios.get to finish
-        results.forEach(result => {
-
-            if(result.hasOwnProperty("link")){
-                links.push(result.link)
-            }else if(result.hasOwnProperty("file")){
-                parsedFiles.push(result.file)
-            }
-
-            parsedLinks = links.join("\n ") // Join all the links in one string
-        }) 
-    })
-    return {files: parsedFiles, links: parsedLinks}
-
-    
+    return result;
 }
 
-async function getEmbed(homework, dueDate, givenDate) {
+function isAFileURL(testUrl){
+    const parsedUrl = url.parse(testUrl);
+    const pathname = parsedUrl.pathname;
+
+    // Get the file extension
+    const extension = path.extname(pathname);
+
+    // List of file extensions that usually need to be downloaded
+    const downloadExtensions = ['.pdf', '.zip', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.odt', '.ods', '.odp', '.mp3', '.mp4', 'ogg', '.mkv'];
+
+    return downloadExtensions.includes(extension);
+}
+
+async function getEmbed(homework) {
+    var givenDate = moment(homework.givenAt);
+    var dueDate = moment(homework.for);
     const promise = new Promise(async (resolve, reject) => {
         await parseFiles(homework.files).then((files) => {
             let content = {
                 embeds: [{
-                    title: "Travail en " + homework.subject + " à rendre pour le " + dueDate.format("DD/MM/YYYY"),
+                    title: "Travail en " + homework.subject + " à rendre pour le " + `<t:${dueDate.unix()}:d>`,
                     description: homework.description ? homework.description : "",
                     color: config.colors[homework.subject] ? config.colors[homework.subject] : homework.color,
                     fields: [{
@@ -143,10 +140,11 @@ async function getEmbed(homework, dueDate, givenDate) {
             }
 
             if(files.files.length !== 0)content.files = files.files // add the files attachments to the messages
-            if(files.links){ // Add the lins to the embeds if there are.
+            if(files.parsedLinks){ // Add the links to the embeds if there are.
+                content.embeds[0].footer = {text: "\n\n ⚠️ Certains liens ne marcheront peut-être pas si vous ne vous n'êtes pas connecter. Veuillez vous connecter à Pronote directement pour y accéder."}
                 content.embeds[0].fields.push({
                     name: "Liens: ",
-                    value: files.links
+                    value: files.parsedLinks
                 })
             }
             resolve(content)
