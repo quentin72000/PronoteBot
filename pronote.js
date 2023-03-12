@@ -13,8 +13,7 @@ module.exports = { login, logout };
 
 async function login(keepAlive) {
   try {
-    const session = await sessionLogin(process.env.PRONOTE_URL, process.env.PRONOTE_USERNAME, process.env.PRONOTE_PASSWORD /*, cas*/ );
-    // const session = await sessionLogin(url, username, password /*, cas*/ );
+    const session = await sessionLogin(process.env.PRONOTE_URL, process.env.PRONOTE_USERNAME, process.env.PRONOTE_PASSWORD, process.env.CAS ? process.env.CAS : "none");
     session.setKeepAlive(keepAlive, error => {
       console.log(error);
     });
@@ -46,6 +45,3 @@ async function logout(session, taskNameOrCommand) {
     console.log(`Logged out of session ${session.id} of the ${taskNameOrCommand.startsWith("/") ? "command" : "task"} ${taskNameOrCommand}.` )
   })
 }
-
-
-logout
