@@ -141,7 +141,7 @@ async function getEmbed(homework) {
 
             if(files.files.length !== 0)content.files = files.files // add the files attachments to the messages
             if(files.parsedLinks){ // Add the links to the embeds if there are.
-                content.embeds[0].footer = {text: "\n\n ⚠️ Certains liens ne marcheront peut-être pas si vous ne vous n'êtes pas connecter. Veuillez vous connecter à Pronote directement pour y accéder."}
+                content.embeds[0].footer = {text: "\n\n ⚠️ Certains liens ne marcheront peut-être pas si vous n'êtes pas connecter. Veuillez vous connecter à Pronote directement pour y accéder."}
                 content.embeds[0].fields.push({
                     name: "Liens: ",
                     value: files.parsedLinks
