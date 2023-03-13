@@ -22,7 +22,7 @@ module.exports = {
         const absentChannel = client.channels.cache.get(config.channels.timetableChange)
 
 
-        await session.timetable(new Date(2023, 1, 27)).then(async(timetable) => {
+        await session.timetable().then(async(timetable) => {
             console.log(timetable);
             await client.pronote.logout(session, taskName)
             
