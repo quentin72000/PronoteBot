@@ -39,30 +39,56 @@ require("./handler")(client);
 
 async function createDB(db){
 
-    db.run(`CREATE TABLE "changementedt" (
+    await db.run(`CREATE TABLE "changementedt" (
         "date"	TEXT,
         "prof"	TEXT,
         "matiere"	TEXT,
         "horaire"	TEXT
-    )`, (r, err) => handleError(err))
+    )`, async(err) => {
+        if(err){
+            console.log("Cannot create DB... Aborting...")
+            throw err;
+        }
+        await db.run(`CREATE TABLE "homework" (
+            "id"	TEXT NOT NULL UNIQUE,
+            "matiere"	TEXT,
+            "description"	TEXT,
+            "date_rendue"	TEXT,
+            "date_donne"	TEXT,
+            "fichiers"	TEXT,
+            "fait"	INTEGER,
+            "message_id"	TEXT,
+            PRIMARY KEY("id")
+        )`, async(err) => {
+            if(err){
+                console.log("Cannot create DB... Aborting...")
+                throw err;
+            }
+            await db.run(`CREATE TABLE "moyenne" (
+                "matiere"	TEXT,
+                "moyenne"	INTEGER,
+                "moyenne_classe"	INTEGER
+            )`, async(err) => { 
+                if(err){
+                    console.log("Cannot create DB... Aborting...")
+                    throw err;
+                }
+                await db.run(`INSERT INTO moyenne (matiere) VALUES ('global') `,async(err) => {
+                    if(err){
+                        console.log("Cannot create DB... Aborting...")
+                        throw err;
+                    }
+                    console.log("DB successfully created !");
+                } )
+            })
+        })
+    })
 
-    db.run(`CREATE TABLE "homework" (
-        "id"	TEXT NOT NULL UNIQUE,
-        "matiere"	TEXT,
-        "description"	TEXT,
-        "date_rendue"	TEXT,
-        "date_donne"	TEXT,
-        "fichiers"	TEXT,
-        "fait"	INTEGER,
-        "message_id"	TEXT,
-        PRIMARY KEY("id")
-    )`, (r, err) => handleError(err))
     
-    db.run(`CREATE TABLE "moyenne" (
-        "matiere"	TEXT,
-        "moyenne"	INTEGER,
-        "moyenne_classe"	INTEGER
-    )`, (r, err) => handleError(err))
+    
+    
+
+    
 
     function handleError(err){
         if(err){

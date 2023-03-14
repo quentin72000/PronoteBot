@@ -15,19 +15,28 @@ module.exports = {
      */
     run: async (client, interaction, args) => {
         let session = await client.pronote.login()
-        session.marks().then(async(moyenne)=>{
+        session.marks().then(async(marks)=>{
             await client.pronote.logout(session, "/moyenne")
+            let moyenne = marks.averages
+            let color;
+
+            if(moyenne.student > 15.5)color = "#0E6C38"
+            else if(moyenne.student > 12)color= "GREEN"
+            else if(moyenne.student > 9)color = "ORANGE"
+            else color = "RED"
+
 
             await interaction.editReply({embeds: [{
                 title: "Moyennes",
                 fields: [{
                     name: "Moyenne de l'élève",
-                    value: moyenne.averages.student + "/20"
+                    value: moyenne.student ? moyenne.student + "/20" : "Aucune note dans la période actuelle."
                 },
                 { 
                     name: "Moyenne de la classe",
-                    value: moyenne.averages.studentClass + "/20"            }
-            ]
+                    value: moyenne.studentClass ? moyenne.studentClass + "/20": "Aucune note dans la période actuelle."
+                }],
+                color: color
             }]})
         })
     }

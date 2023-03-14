@@ -23,7 +23,6 @@ module.exports = {
 
 
         await session.timetable().then(async(timetable) => {
-            console.log(timetable);
             await client.pronote.logout(session, taskName)
             
             // Timetable embed update part
