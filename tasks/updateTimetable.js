@@ -15,11 +15,24 @@ module.exports = {
         console.log(`Running the ${taskName} task.`)
         let session = await client.pronote.login()
 
-        // Taked from https://github.com/Gamers-geek/PronoteBot/blob/master/events/ready.js
+        // Taked and edited from https://github.com/Gamers-geek/PronoteBot/blob/master/events/ready.js
 
         const timetableChannel = await client.channels.cache.get(config.channels.timetable);
-        const timetableMsg = await timetableChannel.messages.fetch(config.channels.timetableMsg)
-        const absentChannel = client.channels.cache.get(config.channels.timetableChange)
+        const timetableMsg = await new Promise(async(resolve, reject) => {
+            await db.get(`SELECT * FROM config WHERE name="timeTableMsgID"`, async(err, result) => {
+                if(err) throw err;
+                
+                if(!result)resolve(await createTimetableMsg(db, timetableChannel))
+                else {
+                    let message = await timetableChannel.messages.fetch(result.value).catch(async(err) => {
+                        resolve(await createTimetableMsg(db, timetableChannel, true))
+                    })
+                    if(message)resolve(message)
+                }
+            })
+        })
+        
+        const absentChannel = await client.channels.cache.get(config.channels.timetableChange)
 
 
         await session.timetable().then(async(timetable) => {
@@ -28,8 +41,11 @@ module.exports = {
             // Timetable embed update part
             const embed = new MessageEmbed()
                 .setColor('#0099ff')
+                embed.setTimestamp()
+                embed.setFooter({ text: `Mis à jour le: `})
             if (timetable.length === 0) {
-                embed.setDescription(`Aucun cours n'est prévu aujourd'hui`)
+                embed.setTitle(`Aucun cours n'est prévu aujourd'hui`)
+                
             }
             timetable.map(cours => {
                 let conditionAbsent = cours.status === "Prof. absent" || cours.status === "Prof./pers. absent"
@@ -43,8 +59,6 @@ module.exports = {
                         name: conditionAbsent ? `❌ __Prof. absent__ : ${cours.subject}` : conditionAnnule ? `❌ __Cours annulé__ : ${cours.subject}` :`✅ ${cours.subject}`,
                         value: conditionAbsent || conditionAnnule ? `~~**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Professeur :** ${cours.teacher}\n**Début :** <t:${Math.floor(coursDate / 1000)}:t>~~` : `**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Professeur :** ${cours.teacher}\n**Début :** <t:${Math.floor(coursDate / 1000)
                     }:t>` }])
-                    embed.setTimestamp()
-                    embed.setFooter({ text: `Mis à jour le: `})
 
                     // Notifications part
 
@@ -65,9 +79,8 @@ module.exports = {
                             .setColor("RED")
                         absentChannel.send({ embeds: [embed] })
                         profAbsent.set(cours.id, cours.teacher)
-                        
                     }
-            }
+                }
             })
 
             const row = new MessageActionRow()
@@ -91,3 +104,21 @@ module.exports = {
         name: "updateTimetable"
     }
 };
+
+const createTimetableMsg = (db, timetableChannel, update = false) => new Promise(async(resolve, reject) => {
+    console.log('Timetable message not found... (re)creating...')
+
+    let message = await timetableChannel.send({embeds: [{
+        title: "Emploi du temps.",
+        description: "Initialisation..."
+    }]})
+
+    if(!message)throw "Can't send timetable message. Please check your config or bot permisions."
+    if(update === true)await db.run(`UPDATE config SET value="${message.id}" WHERE name="timeTableMsgID"`, (err) => {
+        if(err) throw err;
+    })
+    else await db.run(`INSERT INTO config (name, value) VALUES ("timeTableMsgID", "${message.id}")`, (err) => {
+        if(err) throw err;
+    })
+    resolve(message)
+})

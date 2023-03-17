@@ -78,6 +78,10 @@ async function createDB(db){
                         console.log("Cannot create DB... Aborting...")
                         throw err;
                     }
+                    await db.run(`CREATE TABLE "config" (
+                        "name"	TEXT NOT NULL UNIQUE,
+                        "value"	TEXT
+                    )`)
                     console.log("DB successfully created !");
                 } )
             })

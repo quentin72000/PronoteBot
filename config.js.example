@@ -10,7 +10,6 @@ module.exports = {
         suggId: "channel id for suggestion",
         timetableChange: "channel id for timetable change",
         timetable: "channel id for timetable embed channel",
-        timetableMsg: "message id of the embed timetable message"
     },
     colors: { // Bypass default color of a subject if you don't like or is confusing. The name must be the same as what you see in your timetable to work !
             "subject name": "#customColor", 

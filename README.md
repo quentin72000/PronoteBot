@@ -77,8 +77,7 @@ module.exports = {
         moyenne: "channel id for moyenne",
         suggId: "channel id for suggestion",
         timetableChange: "channel id for timetable change",
-        timetable: "channel id for timetable embed channel",
-        timetableMsg: "message id of the embed timetable message"
+        timetable: "channel id for timetable embed channel"
     },
     colors: { // Set colors for each subject in your timetable. The name must be the same as what you see in your timetable to work ! (Will be removed in a next update to use colors that are already defined in Pronote !)   
             "subject name": "#customColor", 
