@@ -35,7 +35,7 @@ client.on("interactionCreate", async (interaction) => {
         if(interaction.customId === "refresh_timetable"){
             await interaction.deferReply({ ephemeral: true});
             await client.tasks["updateTimetable"].run();
-            await interaction.editReply({content: "Refreshed Timetable !", ephemeral: true});
+            await interaction.editReply({content: "Emploi du temps actualisé !", ephemeral: true});
         }
     }
 });

@@ -73,13 +73,12 @@ module.exports = {
     prefix: "Bot prefix for message commands",
     slashCommandGuildId: "slash command guild id",
     channels: {
-        homework: "channel id for homework",
-        moyenne: "channel id for moyenne",
-        suggId: "channel id for suggestion",
-        timetableChange: "channel id for timetable change",
-        timetable: "channel id for timetable embed channel"
+        homework: "channel id for homeworks",
+        moyenne: "channel id for moyenne update",
+        timetableChange: "channel id for timetable changes",
+        timetable: "channel id for the timetable embed"
     },
-    colors: { // Set colors for each subject in your timetable. The name must be the same as what you see in your timetable to work ! (Will be removed in a next update to use colors that are already defined in Pronote !)   
+    colors: { // Bypass default color of a subject if you don't like it or if the color is confusing. The name must be the same as what you see in your timetable to work !
             "subject name": "#customColor", 
             // "SCIENCES VIE & TERRE": "#38c219", // example
             default: "#000000" // default color must be provided ! He will be used for all non-set subject

@@ -87,7 +87,7 @@ module.exports = {
 			.addComponents(
 				new MessageButton()
 					.setCustomId('refresh_timetable')
-					.setLabel('Refresh timetable')
+					.setLabel("Actualiser l'emploi du temps")
 					.setStyle("SECONDARY")
                     .setEmoji("🔄"),
 			);

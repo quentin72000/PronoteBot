@@ -1,10 +1,10 @@
 const {Client, Collection} = require('discord.js')
 require('dotenv').config();
-let pronote = require('./pronote.js')
+
 let sqlite = require('sqlite3')
 const fs = require("fs")
 
-
+// DB Creation check
 let db;
 (async() => {
     if(!fs.existsSync("data.db")){
@@ -81,25 +81,15 @@ async function createDB(db){
                     await db.run(`CREATE TABLE "config" (
                         "name"	TEXT NOT NULL UNIQUE,
                         "value"	TEXT
-                    )`)
+                    )`,async(err) => {
+                        if(err){
+                            console.log("Cannot create DB... Aborting...")
+                            throw err;
+                        }
+                    })
                     console.log("DB successfully created !");
                 } )
             })
         })
     })
-
-    
-    
-    
-
-    
-
-    function handleError(err){
-        if(err){
-            console.log("Cannot create DB... Aborting...")
-            console.error(err)
-            process.exit(1)
-        }
-    }
-
 }

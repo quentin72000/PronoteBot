@@ -83,7 +83,7 @@ async function initializeMatiere(moyennes, m, mc) {
 
     await db.all(`SELECT * FROM moyenne`, async (err, data) => { // select all the rows in the table
         if (err) throw err;
-        moyennes.subjects.forEach(async (matterData) => { // loop each mater in the json db
+        moyennes.subjects.forEach(async (matterData) => { // loop each mater
             let matter = data.find(x => x.matiere == matterData.name) // find the conresponding row in the table
             if (!matter) { // if not found, create it with current value
 
