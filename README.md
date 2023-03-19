@@ -1,17 +1,22 @@
 <h1 align="center" id="title">PronoteBot</h1>
 
-<p align="center"><img src="https://github.com/quentin72000/PronoteBot/raw/rewrite/assets/logo.png" alt="project-image"></p>
+<p align="center"><img src="https://github.com/quentin72000/PronoteBot/raw/main/assets/logo.png" alt="project-image"></p>
 
 <p id="description" align="center">PronoteBot is a discord bot who inform about certain event of Pronote using the pronote-api by Litarvan</p>
 
+![PronoteBot GitHub package.json version](https://img.shields.io/github/package-json/v/quentin72000/PronoteBot)
+![GitHub last commit](https://img.shields.io/github/last-commit/quentin72000/PronoteBot)
+![Maintenance](https://img.shields.io/maintenance/yes/2023)
+![discord.js used version](https://img.shields.io/github/package-json/dependency-version/quentin72000/PronoteBot/discord.js)
+![GitHub Repo stars](https://img.shields.io/github/stars/quentin72000/PronoteBot?style=social)
 ## Project Screenshots:
 
 <div float="left">
-    <img src="https://github.com/quentin72000/PronoteBot/raw/rewrite/assets/homeworks.png" alt="Homeworks embed notifcations" width="250">
+    <img src="https://github.com/quentin72000/PronoteBot/raw/main/assets/homeworks.png" alt="Homeworks embed notifcations" width="250">
 
-  <img src="https://github.com/quentin72000/PronoteBot/raw/rewrite/assets/missingTeacher.png" alt="Timetable changes notifications" width="250">
+  <img src="https://github.com/quentin72000/PronoteBot/raw/main/assets/missingTeacher.png" alt="Timetable changes notifications" width="250">
 
-  <img src="https://github.com/quentin72000/PronoteBot/raw/rewrite/assets/averageUpdate.png" alt="Average update notifications" width="200">
+  <img src="https://github.com/quentin72000/PronoteBot/raw/main/assets/averageUpdate.png" alt="Average update notifications" width="200">
 </div>
 
   
@@ -36,7 +41,7 @@ Here're some of the project's best features:
 
 1. Clone or download the repository
 ```sh
-git clone --single-branch --branch rewrite https://github.com/quentin72000/PronoteBot.git
+git clone https://github.com/quentin72000/PronoteBot.git
 ```
 
 2. Start a comand line or move in the folder of the project.
