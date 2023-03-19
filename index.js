@@ -40,10 +40,11 @@ require("./handler")(client);
 async function createDB(db){
 
     await db.run(`CREATE TABLE "changementedt" (
-        "date"	TEXT,
+        "id"	TEXT NOT NULL,
+        "timestamp"	INTEGER,
         "prof"	TEXT,
         "matiere"	TEXT,
-        "horaire"	TEXT
+        "raison"	TEXT
     )`, async(err) => {
         if(err){
             console.log("Cannot create DB... Aborting...")

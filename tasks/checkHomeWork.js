@@ -22,6 +22,7 @@ module.exports = {
         let session = await client.pronote.login()
 
         let from = new Date();
+        from.setDate(from.getDate() - 1)
         let to = new Date(from.getFullYear(), from.getMonth() + 1, from.getDate());
 
         await session.homeworks(from, to).then(async(homeworks) => { // get homeworks for the next 30 days
@@ -35,7 +36,7 @@ module.exports = {
             await db.get(`SELECT * FROM homework WHERE id="${value.id}"`, async (err, result) => {
                     if (err) throw err;
 
-                    if (!result) { // si le devoir n'est pas dans la db, continuez
+                    if (!result) { // if the homework is not in the db, add it...
                         console.log("Adding a new homework to db...")
                         await getEmbed(value).then(async(embed)=> {
                             await client.channels.cache.get(config.channels.homework).send(embed).then(async (msg) => {
