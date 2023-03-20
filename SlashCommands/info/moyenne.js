@@ -1,15 +1,12 @@
-const { Client, CommandInteraction } = require("discord.js");
+const {
+    Client,
+    CommandInteraction
+} = require("discord.js");
 const pronote = require("../../pronote.js")
 module.exports = {
     name: "moyenne",
     description: "Renvoie la moyenne stocker dans la base de donées ou mis à jours si préciser.",
     type: 'CHAT_INPUT',
-	options: [{
-		name: "update",
-		description: "Precise si le programe dois allée chercher la moyenne sur pronote ou dans la base de donées.",
-		type: "BOOLEAN",
-        required: false
-	}],
     /**
      *
      * @param {Client} client
@@ -17,15 +14,30 @@ module.exports = {
      * @param {String[]} args
      */
     run: async (client, interaction, args) => {
-		if(args[0] == true){
-            await interaction.editReply("Lancement de la tache en cours... Cella peut prendre plusieurs minutes...")
-            pronote.getAllData(async(data) => {
-                await interaction.editReply("Votre moyenne est: " + data.notes.moyGenerale.V.replace(",", "."))
-            })
-        }
-        else{
-            let jsondb = require('../../db.json')
-            await interaction.editReply("Votre moyenne est: " + jsondb.notes.moyGenerale.V.replace(",", "."))
-        }
-	}
+        let session = await client.pronote.login()
+        session.marks().then(async(marks)=>{
+            await client.pronote.logout(session, "/moyenne")
+            let moyenne = marks.averages
+            let color;
+
+            if(moyenne.student > 15.5)color = "#0E6C38"
+            else if(moyenne.student > 12)color= "GREEN"
+            else if(moyenne.student > 9)color = "ORANGE"
+            else color = "RED"
+
+
+            await interaction.editReply({embeds: [{
+                title: "Moyennes",
+                fields: [{
+                    name: "Moyenne de l'élève",
+                    value: moyenne.student ? moyenne.student + "/20" : "Aucune note dans la période actuelle."
+                },
+                { 
+                    name: "Moyenne de la classe",
+                    value: moyenne.studentClass ? moyenne.studentClass + "/20": "Aucune note dans la période actuelle."
+                }],
+                color: color
+            }]})
+        })
+    }
 }

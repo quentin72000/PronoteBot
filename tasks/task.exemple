@@ -1,10 +1,10 @@
-const fs = require('fs');
+let client = require("../index.js")
+let {db,config} = client;
+
+
 module.exports = {
     run: function () {
-        let {db, client} = require("../index.js")
         console.log("Running the [taskName] task")
-        const stringjsondb = fs.readFileSync("./db.json")
-        let jsondb = JSON.parse(stringjsondb)
     },
     task: {
         cron: "", // https://crontab.guru

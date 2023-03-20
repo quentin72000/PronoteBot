@@ -1,67 +1,59 @@
-const fs = require('fs');
 let client = require("../index.js");
-let {db,config} = client;
-const {
-    getAllData
-} = require('../pronote.js');
+let { db, config } = client;
 
 module.exports = {
     run: async function () {
+        let taskName = "updateMoyenne"
 
-        new Promise(async (resolve, reject) => {
-            console.log("Running the updateMoyenne task");
-            await initializeMatiere()
+        console.log(`Running the ${taskName} task.`)
+
+        let session = await client.pronote.login()
+        await session.marks().then((async(moyennes) => {
+            await client.pronote.logout(session, taskName)
+
+            // m = moyenne générale perso, mc = moyenne de la classe
+            let m = moyennes.averages.student
+            let mc = moyennes.averages.studentClass
+    
+            await initializeMatiere(moyennes, m, mc)
             let channel = client.channels.cache.get(client.config.channels.moyenne);
-            await getAllData(function (data) {
-                const stringjsondb = fs.readFileSync("./db.json");
-                let jsondb = JSON.parse(stringjsondb);
-                let m = parseFloat(jsondb.notes.moyGenerale.V.replace(",", "."));
-                let mc = parseFloat(jsondb.notes.moyGeneraleClasse.V.replace(",", "."));
-                // m = moyenne générale perso, mc = moyenne de la class
-                db.all("SELECT * FROM moyenne", async (err, all) => {
-                    if (err) throw err;
-                    if (all.length === 0) {
-                        console.log("moyenne table is empty, initializing...");
-                        await initializeMatiere();
-                    }
-                    let global = all.filter(x => x.matiere == "global")
-                    if (global.moyenne != m) {
+    
+                db.all("SELECT * FROM moyenne", async (err, result) => {
+                    let global = result.filter(x => x.matiere == "global")[0]
+                    if (global.moyenne !== m) {
                         if (global.moyenne < m) {
-                            checkMoyenneUpdateForMatters(all, async (changes) => {
+                            checkMoyenneUpdateForMatters(moyennes, async (changes) => {
                                 await channel.send({
                                     embeds: [{
                                         title: ":arrow_upper_right: Votre moyenne a augmenté !",
-                                        description: `\`+${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc}${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`
+                                        description: `\`+${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc}${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
+                                        color: 'GREEN'
                                     }],
                                     content: `<@${config.owner_id}>`
                                 });
                             });
                         }
                         if (global.moyenne > m) {
-                            checkMoyenneUpdateForMatters(all, async (changes) => {
+                            checkMoyenneUpdateForMatters(moyennes, async (changes) => {
                                 await channel.send({
                                     embeds: [{
                                         title: ":arrow_lower_right: Votre moyenne a baissé !",
-                                        description: `\`-${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc} ${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`
+                                        description: `\`-${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc} ${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
+                                        color: 'RED'
+    
                                     }],
                                     content: `<@${config.owner_id}>`
                                 });
                             });
-
+    
                         }
-
-                        // client.channels.cache.get("799769654502490142").send("Ta moyenne est passé de " + data.moyenne + " à " + m + '\nLa moyenne de la classe est de ' + mc)
+    
                         await db.run(`UPDATE moyenne SET  moyenne = "${m}", moyenne_classe ="${mc}" WHERE matiere="global"`, (err) => {
                             if (err) throw err
                         });
                     }
                 })
-                resolve()
-            })
-        }).then(() => {
-            require('./checkHomeWork.js').run()
-        })
-
+        }))
 
     },
     task: {
@@ -84,27 +76,23 @@ function diff(num1, num2) {
 }
 
 // inset in the table moyenne for each matter and set it to the actual value if it doesn't exist
-async function initializeMatiere() {
-    const stringjsondb = fs.readFileSync("./db.json")
-    let jsondb = JSON.parse(stringjsondb)
+async function initializeMatiere(moyennes, m, mc) {
+
     console.log("Initializing the moyenne table...")
 
-    // m = moyenne générale perso, mc = moyenne de la classe
-    let m = parseFloat(jsondb.notes.moyGenerale.V.replace(",", "."))
-    let mc = parseFloat(jsondb.notes.moyGeneraleClasse.V.replace(",", "."))
 
     await db.all(`SELECT * FROM moyenne`, async (err, data) => { // select all the rows in the table
         if (err) throw err;
-        jsondb.notes.listeServices.V.forEach(async (matterData) => { // loop each mater in the json db
-            let matter = data.find(x => x.matiere == matterData.L) // find the conresponding row in the table
+        moyennes.subjects.forEach(async (matterData) => { // loop each mater
+            let matter = data.find(x => x.matiere == matterData.name) // find the conresponding row in the table
             if (!matter) { // if not found, create it with current value
 
                 // mm = moyenne matiere, mmc = moyenne matiere de la classe
-                let mm = parseFloat(matterData.moyEleve.V.replace(",", "."))
-                let mmc = parseFloat(matterData.moyClasse.V.replace(",", "."))
+                let mm = matterData.averages.student
+                let mmc = matterData.averages.studentClass;
 
-                console.log(`Inserting ${matterData.L} in the table moyenne.`)
-                await db.run(`INSERT INTO moyenne (matiere, moyenne, moyenne_classe) VALUES ('${matterData.L}', ${mm}, ${mmc})`, (err) => {
+                console.log(`Inserting ${matterData.name} in the table moyenne.`)
+                await db.run(`INSERT INTO moyenne (matiere, moyenne, moyenne_classe) VALUES ('${matterData.name}', ${mm}, ${mmc})`, (err) => {
                     if (err) throw err;
                 })
             }
@@ -120,22 +108,24 @@ async function initializeMatiere() {
         }
     })
 
-}   
+}
 
-async function checkMoyenneUpdateForMatters(jsondb, callback) {
+async function checkMoyenneUpdateForMatters(moyennes, callback) {
     let changes = []
-    jsondb.notes.listeServices.V.forEach(async (matter) => {
-        await db.get(`SELECT * FROM moyenne WHERE matiere = '${matter.L}'`, async (err, data) => {
+    moyennes.subjects.forEach(async (matter) => {
+        await db.get(`SELECT * FROM moyenne WHERE matiere = '${matter.name}'`, async (err, data) => {
+            // console.table(data)
+            console.table(matter)
             if (err) throw err;
             if (!data) await initializeMatiere()
-            else if (data.moyenne != matter.moyEleve) {
-                if (data.moyenne < matter.moyEleve) {
+            else if (data.moyenne != matter.averages.student) {
+                if (data.moyenne < matter.averages.student) {
                     changes.push({
-                        matter: matter.L,
+                        matter: matter.name,
                         old: data.moyenne,
-                        new: matter.moyEleve
+                        new: matter.averages.student
                     });
-                    db.run(`UPDATE moyenne SET moyenne = "${matter.moyEleve}", moyenne_classe="${matter.moyClasse}" WHERE matiere="${matter.L}"`, (err) => {
+                    db.run(`UPDATE moyenne SET moyenne = "${matter.averages.student}", moyenne_classe="${matter.averages.studentClass}" WHERE matiere="${matter.name}"`, (err) => {
                         if (err) throw err
                     })
                 }
