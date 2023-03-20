@@ -52,7 +52,7 @@ function decipher(session, data, { compress, scrambled, key, asBytes } = {})
         const split = result.split(',');
 
         for (let i = 0; i < split.length; i++) {
-            buffer.putInt(parseInt(split[i]));
+            buffer.putInt(parseInt(split[i]), 8);
         }
 
         return buffer;
@@ -68,7 +68,7 @@ function createCipher(session, key, decipher, disableIV = false)
     }
 
     const cipher = forge.cipher[decipher ? 'createDecipher' : 'createCipher']('AES-CBC', md5(key));
-    const iv = disableIV ? new forge.util.ByteBuffer() : md5(session.aesIV);
+    const iv = disableIV ? forge.util.createBuffer('\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00') : md5(session.aesIV);
 
     cipher.start({ iv });
 
