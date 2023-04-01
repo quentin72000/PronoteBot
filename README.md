@@ -157,5 +157,5 @@ If your CAS or ENT is not on the list, feel free to open an Issue and I will try
 Technologies used in the project:
 
 *   Node.JS
-*   Litarvan/pronote-api
+*   [Modified version](https://github.com/quentin72000/pronote-api) of Litarvan/pronote-api
 *   Discord.js V13

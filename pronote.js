@@ -1,5 +1,5 @@
 require('dotenv').config();
-let {PronoteSession, login: sessionLogin, errors} = require("pronote-api");
+let {PronoteSession, login: sessionLogin, errors} = require("pronote-api-maintained");
 
 
 module.exports = { login, logout };
