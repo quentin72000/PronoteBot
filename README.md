@@ -149,7 +149,23 @@ This way you will have access to the login page. You can now ask for a username 
 
 </details>
 If your CAS or ENT is not on the list, feel free to open an Issue and I will try to help you.
-  
+
+## Prepare for a new school year
+You can run the script "clean-db.js" to delete all the data of the previous school year. 
+This will delete all the data of the previous year and will create a new database for the new year.
+
+> **Warning**<br>
+> This will delete all your previous data. <br>
+> Make sure to backup your database before running this script if you want to keep your previous data.
+
+* To run the script, run the following command in a terminal:
+```bash
+node scripts/clean-db.js  
+```
+
+
+
+
   
 ## 💻 Built with:
 
