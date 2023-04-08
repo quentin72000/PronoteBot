@@ -29,7 +29,7 @@ module.exports = {
                                         description: `\`+${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc}${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
                                         color: 'GREEN'
                                     }],
-                                    content: `<@${config.owner_id}>`
+                                    content: `<@${config.notificationUserId}>`
                                 });
                             });
                         }
@@ -42,7 +42,7 @@ module.exports = {
                                         color: 'RED'
     
                                     }],
-                                    content: `<@${config.owner_id}>`
+                                    content: `<@${config.notificationUserId}>`
                                 });
                             });
     

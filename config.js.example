@@ -1,8 +1,7 @@
 module.exports = {
 
 
-    "owner_id": "Bot owner id (unlock eval command)", // Unlock the "eval" command
-    prefix: "Bot prefix for message commands", // Only used for the "eval" command (advanced use only)
+    notificationUserId: "user id", // Discord user id that will be notified for certain event (in general, it's the pronote account owner)
     slashCommandGuildId: "slash command guild id", // The Discord guild id where the slash commands will be added.
     channels: {
         homework: "channel id for homework", // Discord channel id for the homeworks

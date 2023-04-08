@@ -74,8 +74,7 @@ BOT_TOKEN=YOUR DISCORD BOT TOKEN
 module.exports = {
 
 
-    "owner_id": "Bot owner id (unlock eval command)",
-    prefix: "Bot prefix for message commands",
+    notificationUserId: "user id", // Discord user id that will be notified for certain event (in general, it's the pronote account owner)
     slashCommandGuildId: "slash command guild id",
     channels: {
         homework: "channel id for homeworks",

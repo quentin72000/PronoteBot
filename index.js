@@ -1,7 +1,7 @@
-const {Client, Collection} = require('discord.js')
+const {Client, Collection, Intents } = require('discord.js')
 require('dotenv').config();
 
-let sqlite = require('sqlite3')
+const sqlite = require('sqlite3')
 const fs = require("fs")
 
 // DB Creation check
@@ -18,13 +18,15 @@ let db;
 
 
 const client = new Client({
-    intents: 32767
+    intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_MESSAGES,
+    ]
 });
 
 module.exports = client; // export client
 
 // Global Variables
-client.commands = new Collection();
 client.slashCommands = new Collection();
 client.config = require("./config");
 client.db = db
@@ -38,59 +40,39 @@ require("./handler")(client);
 
 
 async function createDB(db){
-
-    await db.run(`CREATE TABLE "changementedt" (
-        "id"	TEXT NOT NULL,
-        "timestamp"	INTEGER,
-        "prof"	TEXT,
-        "matiere"	TEXT,
-        "raison"	TEXT
-    )`, async(err) => {
+    db.exec(`
+        CREATE TABLE "changementedt" (
+            "id" TEXT NOT NULL,
+            "timestamp" INTEGER,
+            "prof" TEXT,
+            "matiere" TEXT,
+            "raison" TEXT
+        );
+        
+        CREATE TABLE "homework" (
+            "id" TEXT NOT NULL UNIQUE,
+            "matiere" TEXT,
+            "description" TEXT,
+            "date_rendue" TEXT,
+            "date_donne" TEXT,
+            "fichiers" TEXT,
+            "fait" INTEGER,
+            "message_id" TEXT,
+            PRIMARY KEY("id")
+        );
+        
+        CREATE TABLE "moyenne" (
+            "matiere" TEXT,
+            "moyenne" INTEGER,
+            "moyenne_classe" INTEGER
+        );
+        
+        INSERT INTO moyenne (matiere) VALUES ("global");
+    `, async(err) => {
         if(err){
             console.log("Cannot create DB... Aborting...")
             throw err;
         }
-        await db.run(`CREATE TABLE "homework" (
-            "id"	TEXT NOT NULL UNIQUE,
-            "matiere"	TEXT,
-            "description"	TEXT,
-            "date_rendue"	TEXT,
-            "date_donne"	TEXT,
-            "fichiers"	TEXT,
-            "fait"	INTEGER,
-            "message_id"	TEXT,
-            PRIMARY KEY("id")
-        )`, async(err) => {
-            if(err){
-                console.log("Cannot create DB... Aborting...")
-                throw err;
-            }
-            await db.run(`CREATE TABLE "moyenne" (
-                "matiere"	TEXT,
-                "moyenne"	INTEGER,
-                "moyenne_classe"	INTEGER
-            )`, async(err) => { 
-                if(err){
-                    console.log("Cannot create DB... Aborting...")
-                    throw err;
-                }
-                await db.run(`INSERT INTO moyenne (matiere) VALUES ('global') `,async(err) => {
-                    if(err){
-                        console.log("Cannot create DB... Aborting...")
-                        throw err;
-                    }
-                    await db.run(`CREATE TABLE "config" (
-                        "name"	TEXT NOT NULL UNIQUE,
-                        "value"	TEXT
-                    )`,async(err) => {
-                        if(err){
-                            console.log("Cannot create DB... Aborting...")
-                            throw err;
-                        }
-                    })
-                    console.log("DB successfully created !");
-                } )
-            })
-        })
-    })
+        console.log("DB successfully created !");
+    });
 }
