@@ -55,12 +55,12 @@ module.exports = {
                         let conditionAbsent = cours.status === "Prof. absent" || cours.status === "Prof./pers. absent"
                         let conditionAnnule = cours.status === "Cours annulé" /*&& cours.hasDuplicate === false*/
                         const coursDate = new Date(cours.from)
-                        timetableEmbed.setTitle(`Emploi du temps du ${coursDate.toLocaleDateString()}`)
+                        timetableEmbed.setTitle(`Emploi du temps du <t:${Math.floor(coursDate / 1000)}:d>`)
 
                         if(cours.status !== "Cours annulé" || cours.hasDuplicate !== true){ // filter duplicates of cours annulé to avoid confusion and false alert
                             timetableEmbed.addFields([{
                                 name: conditionAbsent ? `❌ __Prof. absent__ : ${cours.subject}` : conditionAnnule ? `❌ __Cours annulé__ : ${cours.subject}` :`✅ ${cours.subject}`,
-                                value: conditionAbsent || conditionAnnule ? `~~**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Professeur :** ${cours.teacher}\n**Début :** <t:${Math.floor(coursDate / 1000)}:t>~~` : `**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Professeur :** ${cours.teacher}\n**Début :** <t:${Math.floor(coursDate / 1000)
+                                value: conditionAbsent || conditionAnnule ? `~~**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Professeur :** ${cours.teacher}\n**Début :** <t:${Math.floor(coursDate / 1000)}:F>~~` : `**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Professeur :** ${cours.teacher}\n**Début :** <t:${Math.floor(coursDate / 1000)
                             }:t>` }])
         
                             // Notifications part
@@ -70,7 +70,7 @@ module.exports = {
                             if (conditionAbsent) {
                                 const embed = new MessageEmbed()
                                     .setTitle(`__Professeur absent__ : ${cours.teacher}`)
-                                    .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Début :** <t:${Math.floor(coursDate / 1000)}:t>`)
+                                    .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:F>`)
                                     .setColor("RED")
                                 absentChannel.send({ embeds: [embed] })
                                 db.run(`INSERT INTO changementedt VALUES ("${cours.id}", ${coursDate.getTime()/1000}, "${cours.teacher}", "${cours.subject}", "${cours.status}")`)
@@ -78,7 +78,7 @@ module.exports = {
                             else if (conditionAnnule){
                                 const embed = new MessageEmbed()
                                     .setTitle(`__Cours annulé__ : ${cours.teacher}`)
-                                    .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Début :** <t:${Math.floor(coursDate / 1000)}:t>`)
+                                    .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:f>`)
                                     .setColor("RED")
                                 absentChannel.send({ embeds: [embed] })
                                 db.run(`INSERT INTO changementedt VALUES ("${cours.id}", ${coursDate.getTime()/1000}, "${cours.teacher}", "${cours.subject}", "${cours.status}")`)

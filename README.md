@@ -72,21 +72,54 @@ BOT_TOKEN=YOUR DISCORD BOT TOKEN
 
 ```js
 module.exports = {
-
-
+  
     notificationUserId: "user id", // Discord user id that will be notified for certain event (in general, it's the pronote account owner)
-    slashCommandGuildId: "slash command guild id",
+    slashCommandGuildId: "slash command guild id", // The Discord guild id where the slash commands will be added.
     channels: {
-        homework: "channel id for homeworks",
-        moyenne: "channel id for moyenne update",
-        timetableChange: "channel id for timetable changes",
-        timetable: "channel id for the timetable embed"
+        homework: "channel id for homework", // Discord channel id for the homeworks
+        moyenne: "channel id for moyenne", // Discord channel id for the averages updates
+        timetableChange: "channel id for timetable change", // Discord channel id for the timetable changes (missing teacher...)
+        timetable: "channel id for the timetable embed", // Discord Channel id for the live timetable embed
     },
     colors: { // Bypass default color of a subject if you don't like it or if the color is confusing. The name must be the same as what you see in your timetable to work !
             "subject name": "#customColor", 
             // "SCIENCES VIE & TERRE": "#38c219", // example
-            default: "#000000" // default color must be provided ! He will be used for all non-set subject
-    }
+    },
+    
+    tasksConfig: [
+        {
+            name: "informEvent",
+            enabled: true,
+            options: {
+                endOfSchoolYear: true, // Enable the end of school year reminder
+
+                holidays: true, // Enable the holidays reminder
+                holidaysReminderBeforeStart: 1, // Number of days before the start of the holidays to send the reminder
+                pingOnHolidays: true, // Ping the user on the holidays reminder
+            }
+        },
+        {
+            name: "updateTimetable",
+            enabled: true,
+            options: {
+                pingOnTimetableChange: true, // Ping the user on a timetable change
+            }
+        },
+        {
+            name: "checkHomeWork",
+            enabled: true,
+            options: {
+                pingOnNewHomeWork: false, // Ping the user on a new homework
+            }
+        },
+        {
+            name: "updateMoyenne",
+            enabled: true,
+            options: {
+                pingOnMoyenneUpdate: true, // Ping the user on a new average
+            }
+        }
+    ]
 }
 ```
 

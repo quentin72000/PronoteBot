@@ -12,5 +12,40 @@ module.exports = {
     colors: { // Bypass default color of a subject if you don't like it or if the color is confusing. The name must be the same as what you see in your timetable to work !
             "subject name": "#customColor", 
             // "SCIENCES VIE & TERRE": "#38c219", // example
-    }
+    },
+    
+    tasksConfig: [
+        {
+            name: "informEvent",
+            enabled: true,
+            options: {
+                endOfSchoolYear: true, // Enable the end of school year reminder
+
+                holidays: true, // Enable the holidays reminder
+                holidaysReminderBeforeStart: 1, // Number of days before the start of the holidays to send the reminder
+                pingOnHolidays: true, // Ping the user on the holidays reminder
+            }
+        },
+        {
+            name: "updateTimetable",
+            enabled: true,
+            options: {
+                pingOnTimetableChange: true, // Ping the user on a timetable change
+            }
+        },
+        {
+            name: "checkHomeWork",
+            enabled: true,
+            options: {
+                pingOnNewHomeWork: false, // Ping the user on a new homework
+            }
+        },
+        {
+            name: "updateMoyenne",
+            enabled: true,
+            options: {
+                pingOnMoyenneUpdate: true, // Ping the user on a new average
+            }
+        }
+    ]
 }
