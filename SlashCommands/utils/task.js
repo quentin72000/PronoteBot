@@ -6,7 +6,7 @@ const  taksFiles = fs.readdirSync("./tasks").filter(file => file.endsWith('.js')
         for(const file of taksFiles){ // require all tasks file and set the cron.
             const task = require(`../../tasks/${file}`);
 
-            let taskConfig = config.tasksConfig.find(taskConfig => taskConfig.name === task.task.name)
+            let taskConfig = config.tasksConfig?.find(taskConfig => taskConfig.name === task.task.name)
             if(taskConfig && taskConfig.enabled === false)continue;
 
             tasksChoices.push({name: task.task.name, value: task.task.name})

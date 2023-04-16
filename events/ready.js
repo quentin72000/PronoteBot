@@ -10,7 +10,7 @@ client.on('ready', async () => {
     for(const file of taksFiles){ // require all tasks file and set the cron.
         const task = require(`../tasks/${file}`);
         
-        let taskConfig = client.config.tasksConfig.find(taskConfig => taskConfig.name === task.task.name)
+        let taskConfig = client.config.tasksConfig?.find(taskConfig => taskConfig.name === task.task.name)
         if(taskConfig && taskConfig.enabled === false){ // if the task is disabled in the config, skip it.
             console.warn("Task", task.task.name, "is disabled in the config, skipping it.");
             continue;
