@@ -71,6 +71,21 @@ async function deleteDB (){
         );
         
         INSERT INTO moyenne (matiere) VALUES ("global");
+
+        CREATE TABLE "config" (
+            "name"	TEXT NOT NULL UNIQUE,
+            "value"	TEXT
+        );
+
+        CREATE TABLE "holidays" (
+            "name"	TEXT,
+            "from"	INTEGER,
+            "to"	TEXT,
+            "reminder_before_start"	INTEGER DEFAULT 0,
+            "reminder_start"	INTEGER DEFAULT 0,
+            "reminder_before_end"	INTEGER DEFAULT 0,
+            "reminder_end"	INTEGER DEFAULT 0
+        );
     `, async(err) => {
         if(err){
             console.log("Cannot create DB... Aborting...")

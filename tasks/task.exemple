@@ -3,8 +3,10 @@ let {db,config} = client;
 
 
 module.exports = {
-    run: function () {
-        console.log("Running the [taskName] task")
+    run: async function () {
+        let taskName = "[taskName]"
+        console.log(`Running the ${taskName} task.`)
+
     },
     task: {
         cron: "", // https://crontab.guru
