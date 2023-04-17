@@ -12,6 +12,8 @@ module.exports = {
         console.log(`Running the ${taskName} task.`)
         let session = await client.pronote.login()
 
+        let options = config.tasksConfig.find(e => e.name === taskName).options // get the options of the task from the config
+        let content = options.pingOnTimetableChange ? `<@${config.notificationUserId}>` : null
         // Taked and edited from https://github.com/Gamers-geek/PronoteBot/blob/master/events/ready.js
 
         const timetableChannel = await client.channels.cache.get(config.channels.timetable);
@@ -72,7 +74,7 @@ module.exports = {
                                     .setTitle(`__Professeur absent__ : ${cours.teacher}`)
                                     .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:F>`)
                                     .setColor("RED")
-                                absentChannel.send({ embeds: [embed] })
+                                absentChannel.send({ embeds: [embed], content: content })
                                 db.run(`INSERT INTO changementedt VALUES ("${cours.id}", ${coursDate.getTime()/1000}, "${cours.teacher}", "${cours.subject}", "${cours.status}")`)
                             }
                             else if (conditionAnnule){
@@ -80,7 +82,7 @@ module.exports = {
                                     .setTitle(`__Cours annulé__ : ${cours.teacher}`)
                                     .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:f>`)
                                     .setColor("RED")
-                                absentChannel.send({ embeds: [embed] })
+                                absentChannel.send({ embeds: [embed], content: content })
                                 db.run(`INSERT INTO changementedt VALUES ("${cours.id}", ${coursDate.getTime()/1000}, "${cours.teacher}", "${cours.subject}", "${cours.status}")`)
                             }
                         }

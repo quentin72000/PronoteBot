@@ -19,8 +19,7 @@ client.on('ready', async () => {
         console.log("Loading task",task.task.name)
         tasks[task.task.name] = task // save the task in the tasks object.
         
-        // if the task has a cron, create a cronjob and parse taskConfig.options to the task.run function.
-        if(task.task.cron) new CronJob(task.task.cron, () => task.run(taskConfig ? taskConfig.options : undefined), null, true, 'Europe/Paris', null, task.task.runOnStartup)
+        if(task.task.cron){new CronJob(task.task.cron, task.run, null, true, client.config.timezone ? client.config.timezone : "Europe/Paris", null, task.task.runOnStartup)}
 
     }
     client.tasks = tasks;

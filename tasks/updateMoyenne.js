@@ -4,9 +4,10 @@ let { db, config } = client;
 module.exports = {
     run: async function () {
         let taskName = "updateMoyenne"
-
         console.log(`Running the ${taskName} task.`)
+        let options = config.tasksConfig.find(e => e.name === taskName).options // get the options of the task from the config
 
+        let content = options.pingOnMoyenneUpdate ? `<@${config.notificationUserId}>` : null
         let session = await client.pronote.login()
         await session.marks().then((async(moyennes) => {
             await client.pronote.logout(session, taskName)
@@ -29,7 +30,7 @@ module.exports = {
                                         description: `\`+${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc}${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
                                         color: 'GREEN'
                                     }],
-                                    content: `<@${config.notificationUserId}>`
+                                    content: content
                                 });
                             });
                         }
@@ -42,7 +43,7 @@ module.exports = {
                                         color: 'RED'
     
                                     }],
-                                    content: `<@${config.notificationUserId}>`
+                                    content: content
                                 });
                             });
     
@@ -114,8 +115,6 @@ async function checkMoyenneUpdateForMatters(moyennes, callback) {
     let changes = []
     moyennes.subjects.forEach(async (matter) => {
         await db.get(`SELECT * FROM moyenne WHERE matiere = '${matter.name}'`, async (err, data) => {
-            // console.table(data)
-            console.table(matter)
             if (err) throw err;
             if (!data) await initializeMatiere()
             else if (data.moyenne != matter.averages.student) {

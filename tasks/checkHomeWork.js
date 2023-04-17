@@ -11,7 +11,7 @@ let {db,config} = client;
 
 
 
-const { MessageAttachment} = require('discord.js');
+const { MessageAttachment, MessageActionRow, MessageButton} = require('discord.js');
 
 
 module.exports = {
@@ -117,6 +117,10 @@ function isAFileURL(testUrl){
 }
 
 async function getEmbed(homework) {
+
+    let options = config.tasksConfig.find(e => e.name === "checkHomeWork").options // get the options of the task from the config
+
+
     var givenDate = moment(homework.givenAt);
     var dueDate = moment(homework.for);
     const promise = new Promise(async (resolve, reject) => {
@@ -138,6 +142,13 @@ async function getEmbed(homework) {
                         } 
                     ]
                 }],
+                components: [new MessageActionRow().addComponents(new MessageButton()
+                    .setCustomId("homework_done")
+                    .setLabel("Fait")
+                    .setStyle("SUCCESS")
+                    .setEmoji("✅"))
+                ],
+                content: options.pingOnNewHomeWork ? `<@${config.notificationUserId}>` : null
             }
 
             if(files.files.length !== 0)content.files = files.files // add the files attachments to the messages

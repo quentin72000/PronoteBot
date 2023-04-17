@@ -73,6 +73,7 @@ BOT_TOKEN=YOUR DISCORD BOT TOKEN
 ```js
 module.exports = {
   
+    timezone: "Europe/Paris", // Your timezone, used for the cronjobs. (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
     notificationUserId: "user id", // Discord user id that will be notified for certain event (in general, it's the pronote account owner)
     slashCommandGuildId: "slash command guild id", // The Discord guild id where the slash commands will be added.
     channels: {
