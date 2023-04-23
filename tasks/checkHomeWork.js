@@ -91,11 +91,10 @@ async function parseFiles(files) {
     let links = [];
     
     files.forEach(async (file) => {
-        if(isAFileURL(file.url)){ // Check if the attachment is a file.
+        if(file.type === 1){ // If the attachment is a file.
             result.files.push(new MessageAttachment(file.url, file.name))
-        } else { // If the attachment is not a file, it's a link, parse it to discord
-            if(!file.name) links.push(`[${file.url}](${file.url})`) 
-            else links.push(`[${file.name}](${file.url})`)     
+        } else if (file.type === 0) { // If the attachment is a link, parse it to discord
+            links.push(`[${file.name ? file.name : file.url}](${file.url})`)
         } 
     })
     result.parsedLinks = links.join("\n") // Join all the links in one string
@@ -103,18 +102,6 @@ async function parseFiles(files) {
     return result;
 }
 
-function isAFileURL(testUrl){
-    const parsedUrl = url.parse(testUrl);
-    const pathname = parsedUrl.pathname;
-
-    // Get the file extension
-    const extension = path.extname(pathname);
-
-    // List of file extensions that usually need to be downloaded
-    const downloadExtensions = ['.pdf', '.zip', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.odt', '.ods', '.odp', '.mp3', '.mp4', 'ogg', '.mkv'];
-
-    return downloadExtensions.includes(extension);
-}
 
 async function getEmbed(homework) {
 
