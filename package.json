@@ -14,6 +14,7 @@
     "discord.js": "13.14",
     "dotenv": "^16.0.2",
     "moment": "^2.29.4",
+    "moment-duration-format": "^2.3.2",
     "pronote-api-maintained": "github:quentin72000/pronote-api",
     "sqlite3": "^5.1.4"
   }

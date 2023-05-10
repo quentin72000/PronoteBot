@@ -1,5 +1,7 @@
 const { Client, CommandInteraction } = require("discord.js");
 const moment = require("moment");
+require("moment-duration-format");
+
 module.exports = {
     name: "ping",
     description: "Renvoie le ping de discord et du bot.",

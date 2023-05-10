@@ -1,10 +1,4 @@
-const fs = require('fs');
 const moment = require('moment');
-
-const path = require('path');
-const url = require('url');
-
-
 
 let client = require("../index.js")
 let {db,config} = client;
@@ -114,7 +108,7 @@ async function getEmbed(homework) {
         await parseFiles(homework.files).then((files) => {
             let content = {
                 embeds: [{
-                    title: "Travail en " + homework.subject + " à rendre pour le " + `<t:${dueDate.unix()}:d>`,
+                    title: "Travail en " + homework.subject + " pour le " + `<t:${dueDate.unix()}:d>`,
                     description: homework.description ? homework.description : "",
                     color: config.colors[homework.subject] ? config.colors[homework.subject] : homework.color,
                     fields: [{
