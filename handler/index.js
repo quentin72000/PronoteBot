@@ -1,9 +1,8 @@
 const { glob } = require("glob");
-const { promisify } = require("util");
+const path = require("path");
 const { Client } = require("discord.js");
 
 
-const globPromise = promisify(glob);
 
 /**
  * @param {Client} client
@@ -11,7 +10,7 @@ const globPromise = promisify(glob);
 module.exports = async (client) => {
 
     // Commands
-    // const commandFiles = await globPromise(`${process.cwd()}/commands/**/*.js`);
+    // const commandFiles = await glob(`${process.cwd()}/commands/**/*.js`);
     // commandFiles.map((value) => {
     //     const file = require(value);
     //     const splitted = value.split("/");
@@ -24,17 +23,17 @@ module.exports = async (client) => {
     // });
 
     // Events
-    const eventFiles = await globPromise(`${process.cwd()}/events/*.js`);
-    eventFiles.map((value) => require(value));
+    const eventFiles = await glob(`${process.cwd()}/events/*.js`);
+    eventFiles.map((value) => require(path.resolve(value)));
 
     // Slash Commands
-    const slashCommands = await globPromise(
+    const slashCommands = await glob(
         `${process.cwd()}/SlashCommands/*/*.js`
     );
 
     const arrayOfSlashCommands = [];
     slashCommands.map((value) => {
-        const file = require(value);
+        const file = require(path.resolve(value));
         if (!file?.name) return;
         client.slashCommands.set(file.name, file);
 

@@ -40,8 +40,8 @@ module.exports = {
 
             let publicHolidays = params.publicHolidays
             let content = options.pingOnHolidays ? `<@${client.config.notificationUserId}>` : undefined
-            await db.all("SELECT * FROM holidays", async (err, rows) => {
-                if(err) throw err;
+            try {
+                let rows = await db.prepare("SELECT * FROM holidays").all()
 
                 for (let i = 0; i < publicHolidays.length; i++) {
                     
@@ -52,6 +52,7 @@ module.exports = {
                     let diffInDays = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
 
                     let result = rows.find(e => e.name === (value.name ? value.name : "none") && e.from === start.toISOString() && e.to === end.toISOString())
+
                     if(!result){ // If the holidays is not in the database
                         result = {
                             name: name,
@@ -62,11 +63,7 @@ module.exports = {
                             reminder_before_end: 0,
                             reminder_end: 0
                         }
-                        await db.run(`INSERT INTO holidays ("name", "from", "to") VALUES ("${value.name ? value.name : "none"}", "${start.toISOString()}", "${end.toISOString()}")`, async (err) => {
-                            if (err) {
-                                return console.log(err.message);
-                            }
-                        })
+                        await db.prepare(`INSERT INTO holidays ("name", "from", "to") VALUES (?, ?, ?)`).run(value.name ? value.name : "none", start.toISOString(), end.toISOString())
                     }
 
 
@@ -98,7 +95,7 @@ module.exports = {
                                 color: "GREEN",
                                 fields: fields
                             }], content: content})
-                            await db.run(`UPDATE holidays SET reminder_before_start = 1 WHERE name = "${value.name ? value.name : "none"}" AND "from" = "${start.toISOString()}" AND "to" = "${end.toISOString()}"`)
+                            await db.prepare(`UPDATE holidays SET reminder_before_start = 1 WHERE name =? AND "from" =?`).run(value.name ? value.name : "none", start.toISOString())
                         }
 
                         // Inform of the start of the holidays
@@ -109,7 +106,7 @@ module.exports = {
                                 color: "DARK_GREEN",
                                 fields: fields
                             }], content: content})
-                            await db.run(`UPDATE holidays SET reminder_start = 1 WHERE name = "${value.name ? value.name : "none"}" AND "from" = "${start.toISOString()}" AND "to" = "${end.toISOString()}"`)
+                            await db.prepare(`UPDATE holidays SET reminder_start = 1 WHERE name =? AND "from" =?`).run(value.name ? value.name : "none", start.toISOString())
                         }
 
                         // Inform of the end of the holidays
@@ -120,7 +117,7 @@ module.exports = {
                                 color: "DARK_ORANGE",
                                 fields: fields
                             }], content: content})
-                            await db.run(`UPDATE holidays SET reminder_end = 1 WHERE name = "${value.name ? value.name : "none"}" AND "from" = "${start.toISOString()}" AND "to" = "${end.toISOString()}"`)
+                            await db.prepare(`UPDATE holidays SET reminder_end = 1 WHERE name =? AND "from" =?`).run(value.name ? value.name : "none", start.toISOString())
                         }
 
 
@@ -134,7 +131,7 @@ module.exports = {
                                 color: "GREEN",
                                 fields: fields
                             }], content: content})
-                            await db.run(`UPDATE holidays SET reminder_before_start = 1 WHERE name = "${value.name ? value.name : "none"}" AND "from" = "${start.toISOString()}" AND "to" = "${end.toISOString()}"`)
+                            await db.prepare(`UPDATE holidays SET reminder_before_start = 1 WHERE name =? AND "from" =?`).run(value.name ? value.name : "none", start.toISOString())
                         }
 
                         // Inform of the start of the holidays
@@ -145,7 +142,7 @@ module.exports = {
                                 color: "DARK_GREEN",
                                 fields: fields
                             }], content: content})
-                            await db.run(`UPDATE holidays SET reminder_start = 1 WHERE name = "${value.name ? value.name : "none"}" AND "from" = "${start.toISOString()}" AND "to" = "${end.toISOString()}"`)
+                            await db.prepare(`UPDATE holidays SET reminder_start = 1 WHERE name =? AND "from" =?`).run(value.name ? value.name : "none", start.toISOString())
                         }
 
                         // Inform two days before the end of the holidays
@@ -156,7 +153,7 @@ module.exports = {
                                 color: "ORANGE",
                                 fields: fields
                             }], content: content})
-                            await db.run(`UPDATE holidays SET reminder_before_end = 1 WHERE name = "${value.name ? value.name : "none"}" AND "from" = "${start.toISOString()}" AND "to" = "${end.toISOString()}"`)
+                            await db.prepare(`UPDATE holidays SET reminder_before_end = 1 WHERE name =? AND "from" =?`).run(value.name ? value.name : "none", start.toISOString())
                         }
 
                         // Inform of the end of the holidays
@@ -166,11 +163,15 @@ module.exports = {
                                 description: `Les vacances \`${name}\` sont terminées ! \n\n**Bonne rentrée !**`,
                                 color: "DARK_ORANGE"
                             }], content: content})
-                            await db.run(`UPDATE holidays SET reminder_end = 1 WHERE name = "${value.name ? value.name : "none"}" AND "from" = "${start.toISOString()}" AND "to" = "${end.toISOString()}"`)
+                            await db.prepare(`UPDATE holidays SET reminder_end = 1 WHERE name =? AND "from" =?`).run(value.name ? value.name : "none", start.toISOString())
                         }
                     }
                 }
-            })
+                
+            } catch (error) {
+               throw error; 
+            }
+            
         }
 
         await client.pronote.logout(session, taskName)

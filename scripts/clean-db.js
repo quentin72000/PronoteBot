@@ -36,14 +36,16 @@ readline.question('Are you sure you want to delete all the data from the DB? (y/
 
 async function deleteDB (){
     const db = new sqlite.Database("./data.db", sqlite.OPEN_READWRITE);
+    try {
+        // Delete all the tables from the DB
 
-    // Delete all the tables from the DB
-    db.run("DROP TABLE IF EXISTS changementedt");
-    db.run("DROP TABLE IF EXISTS homework");
-    db.run("DROP TABLE IF EXISTS moyenne");
+        db.prepare("DROP TABLE IF EXISTS changementedt").run();
+        db.prepare("DROP TABLE IF EXISTS homework").run();
+        db.prepare("DROP TABLE IF EXISTS moyenne").run();
+        db.prepare("DROP TABLE IF EXISTS holidays").run();
 
-    // Re-create the tables
-    db.exec(`
+        // Re-create the tables
+        db.exec(`
         CREATE TABLE "changementedt" (
             "id" TEXT NOT NULL,
             "timestamp" INTEGER,
@@ -72,7 +74,7 @@ async function deleteDB (){
         
         INSERT INTO moyenne (matiere) VALUES ("global");
 
-        CREATE TABLE "config" (
+        CREATE TABLE IF NOT EXISTS "config" (
             "name"	TEXT NOT NULL UNIQUE,
             "value"	TEXT
         );
@@ -85,14 +87,13 @@ async function deleteDB (){
             "reminder_start"	INTEGER DEFAULT 0,
             "reminder_before_end"	INTEGER DEFAULT 0,
             "reminder_end"	INTEGER DEFAULT 0
-        );
-    `, async(err) => {
-        if(err){
-            console.log("Cannot create DB... Aborting...")
-            throw err;
-        }
+        );`)
+
         console.log("DB successfully created !");
-    });
+
+    } catch (error) {
+        console.log("Cannot create DB... Aborting...")
+    }
 }
 
 

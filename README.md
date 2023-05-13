@@ -30,6 +30,7 @@ Here're some of the project's best features:
 *   QCM reminder (SOON)
 *   Timetable updated live
 *   Timetable update (missings teachers changed room...)
+*   Holidays reminder
 
 ## ❔Requirement:
 * Node.js `v16.6.0` or or higher

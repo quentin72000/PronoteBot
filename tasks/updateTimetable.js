@@ -18,25 +18,24 @@ module.exports = {
 
         const timetableChannel = await client.channels.cache.get(config.channels.timetable);
         const timetableMsg = await new Promise(async(resolve, reject) => { // Message creation system
-            await db.get(`SELECT * FROM config WHERE name="timeTableMsgID"`, async(err, result) => {
-                if(err) throw err;
-                
-                if(!result) resolve(await createTimetableMsg(db, timetableChannel))
-                else {
-                    let message = await timetableChannel.messages.fetch(result.value).catch(async(err) => { // If message not found, recreate it
-                        if(err) throw err;
-                        resolve(await createTimetableMsg(db, timetableChannel, true))
-                    })
+        let timetableMsgID = await db.prepare(`SELECT * FROM config WHERE name=?`).get("timeTableMsgID")
 
-                    if(message) resolve(message)
-                }
+        if(!timetableMsgID) resolve(await createTimetableMsg(db, timetableChannel))
+        else {
+            let message = await timetableChannel.messages.fetch(timetableMsgID.value).catch(async(err) => { // If message not found, recreate it
+                if(err) throw err;
+                resolve(await createTimetableMsg(db, timetableChannel))
             })
-        })
+
+            if(message) resolve(message)
+        }
+    })
+        
 
         const absentChannel = await client.channels.cache.get(config.channels.timetableChange)
 
 
-        await session.timetable().then(async(timetable) => new Promise(async(resolve, reject) => {
+        await session.timetable(new Date(2023, 4, 10)).then(async(timetable) => new Promise(async(resolve, reject) => {
             await client.pronote.logout(session, taskName)
             
             // Timetable embed update part
@@ -50,45 +49,44 @@ module.exports = {
             }else {
                 timetable = timetable.sort((a,b) =>a.from.getTime()-b.from.getTime())
 
-                db.all("SELECT * FROM changementedt", (err, result) => {
-                    if(err) throw err;
-                    timetable.map(cours => {
-                        
-                        let conditionAbsent = cours.status === "Prof. absent" || cours.status === "Prof./pers. absent"
-                        let conditionAnnule = cours.status === "Cours annulé" /*&& cours.hasDuplicate === false*/
-                        const coursDate = new Date(cours.from)
-                        timetableEmbed.setTitle(`Emploi du temps du <t:${Math.floor(coursDate / 1000)}:d>`)
+                let result = db.prepare("SELECT * FROM changementedt").all()
+                    
+                timetable.map(cours => {
+                    
+                    let conditionAbsent = cours.status === "Prof. absent" || cours.status === "Prof./pers. absent"
+                    let conditionAnnule = cours.status === "Cours annulé" /*&& cours.hasDuplicate === false*/
+                    const coursDate = new Date(cours.from)
+                    timetableEmbed.setTitle(`Emploi du temps du <t:${Math.floor(coursDate / 1000)}:d>`)
 
-                        if(cours.status !== "Cours annulé" || cours.hasDuplicate !== true){ // filter duplicates of cours annulé to avoid confusion and false alert
-                            timetableEmbed.addFields([{
-                                name: conditionAbsent ? `❌ __Prof. absent__ : ${cours.subject}` : conditionAnnule ? `❌ __Cours annulé__ : ${cours.subject}` :`✅ ${cours.subject}`,
-                                value: conditionAbsent || conditionAnnule ? `~~**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Professeur :** ${cours.teacher}\n**Début :** <t:${Math.floor(coursDate / 1000)}:F>~~` : `**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Professeur :** ${cours.teacher}\n**Début :** <t:${Math.floor(coursDate / 1000)
-                            }:t>` }])
-        
-                            // Notifications part
+                    if(cours.status !== "Cours annulé" || cours.hasDuplicate !== true){ // filter duplicates of cours annulé to avoid confusion and false alert
+                        timetableEmbed.addFields([{
+                            name: conditionAbsent ? `❌ __Prof. absent__ : ${cours.subject}` : conditionAnnule ? `❌ __Cours annulé__ : ${cours.subject}` :`✅ ${cours.subject}`,
+                            value: conditionAbsent || conditionAnnule ? `~~**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Professeur :** ${cours.teacher}\n**Début :** <t:${Math.floor(coursDate / 1000)}:F>~~` : `**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Professeur :** ${cours.teacher}\n**Début :** <t:${Math.floor(coursDate / 1000)
+                        }:t>` }])
+    
+                        // Notifications part
 
-                            if(result.some(value => {if(value.id === cours.id)return true;}))return; // If already sended, stop
-        
-                            if (conditionAbsent) {
-                                const embed = new MessageEmbed()
-                                    .setTitle(`__Professeur absent__ : ${cours.teacher}`)
-                                    .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:F>`)
-                                    .setColor("RED")
-                                absentChannel.send({ embeds: [embed], content: content })
-                                db.run(`INSERT INTO changementedt VALUES ("${cours.id}", ${coursDate.getTime()/1000}, "${cours.teacher}", "${cours.subject}", "${cours.status}")`)
-                            }
-                            else if (conditionAnnule){
-                                const embed = new MessageEmbed()
-                                    .setTitle(`__Cours annulé__ : ${cours.teacher}`)
-                                    .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:f>`)
-                                    .setColor("RED")
-                                absentChannel.send({ embeds: [embed], content: content })
-                                db.run(`INSERT INTO changementedt VALUES ("${cours.id}", ${coursDate.getTime()/1000}, "${cours.teacher}", "${cours.subject}", "${cours.status}")`)
-                            }
+                        if(result.some(value => {if(value.id === cours.id)return true;}))return; // If already sended, stop
+                        let sqlInsertStm = db.prepare(`INSERT INTO changementedt VALUES (?, ?, ?, ?, ?)`)
+                        if (conditionAbsent) {
+                            const embed = new MessageEmbed()
+                                .setTitle(`__Professeur absent__ : ${cours.teacher}`)
+                                .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:F>`)
+                                .setColor("RED")
+                            absentChannel.send({ embeds: [embed], content: content })
+                            sqlInsertStm.run(cours.id, coursDate.getTime()/1000, cours.teacher, cours.subject, cours.status)
                         }
-                    })
-                    resolve(timetableEmbed)
+                        else if ('conditionAnnule'){
+                            const embed = new MessageEmbed()
+                                .setTitle(`__Cours annulé__ : ${cours.teacher}`)
+                                .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:F>`)
+                                .setColor("RED")
+                            absentChannel.send({ embeds: [embed], content: content })
+                            sqlInsertStm.run(cours.id, coursDate.getTime()/1000, cours.teacher, cours.subject, cours.status)
+                        }
+                    }
                 })
+                resolve(timetableEmbed)
             }
             
 
@@ -116,7 +114,7 @@ module.exports = {
     }
 };
 
-const createTimetableMsg = (db, timetableChannel, update = false) => new Promise(async(resolve, reject) => {
+const createTimetableMsg = (db, timetableChannel) => new Promise(async(resolve, reject) => {
     console.log('Timetable message not found... (re)creating...')
 
     let message = await timetableChannel.send({embeds: [{
@@ -125,11 +123,11 @@ const createTimetableMsg = (db, timetableChannel, update = false) => new Promise
     }]})
 
     if(!message)throw "Can't send timetable message. Please check your config or bot permisions."
-    if(update === true)await db.run(`UPDATE config SET value="${message.id}" WHERE name="timeTableMsgID"`, (err) => {
-        if(err) throw err;
-    })
-    else await db.run(`INSERT INTO config (name, value) VALUES ("timeTableMsgID", "${message.id}")`, (err) => {
-        if(err) throw err;
-    })
+    try {
+        await db.prepare(`INSERT OR REPLACE INTO config (name, value) VALUES (?, ?)`).run("timeTableMsgID", message.id)
+    } catch (error) {
+        throw error;
+    }
+    
     resolve(message)
 })

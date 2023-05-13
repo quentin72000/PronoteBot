@@ -41,9 +41,8 @@ client.on("interactionCreate", async (interaction) => {
         }else if (interaction.customId === "homework_done"){
             await interaction.deferReply({ ephemeral: true});
 
-
-            client.db.get(`SELECT * FROM homework WHERE message_id = "${interaction.message.id}"`, async (err, result) => {
-                if (err) throw err;
+            try {
+                let result = client.db.prepare(`SELECT * FROM homework WHERE message_id = ?`).get(interaction.message.id)
                 if (result) {
                     let session = await client.pronote.login();
                     await session.homeworks(new Date(result.date_donne), new Date(result.date_rendue)).then(async(homeworks) => {
@@ -53,19 +52,17 @@ client.on("interactionCreate", async (interaction) => {
                                 const value = homeworks[i];
                                 if (value.id === result.id) {
                                     found = true;
+                                    let sqlUpdateHomeWork = client.db.prepare(`UPDATE homework SET fait = 1 WHERE message_id = ?`)
                                     if (value.done !== true) { // If homework is not already done in the API, mark it as done and update the DB
                                         await value.markAs(true);
-                                        await client.db.run(`UPDATE homework SET fait = 1 WHERE message_id = "${interaction.message.id}"`, async(err) => {
-                                            if (err) throw err;
-                                            await interaction.message.delete()
-                                            await interaction.editReply({embeds: [getHomeworkEmbed(false)], ephemeral: true});
-                                        });
+                                        await sqlUpdateHomeWork.run(interaction.message.id)
+                                        await interaction.message.delete()
+                                        await interaction.editReply({embeds: [getHomeworkEmbed(false)], ephemeral: true});
+                                        
                                     } else { // If homework is already done in the API, just update the DB
-                                        await client.db.run(`UPDATE homework SET fait = 1 WHERE message_id = "${interaction.message.id}"`, async(err) => {
-                                            if (err) throw err;
-                                            await interaction.message.delete()
-                                            await interaction.editReply({embeds: [getHomeworkEmbed(false)], ephemeral: true});
-                                        });
+                                        await sqlUpdateHomeWork.run(interaction.message.id)
+                                        await interaction.message.delete()
+                                        await interaction.editReply({embeds: [getHomeworkEmbed(false)], ephemeral: true});
                                     }
                                     break;
                                 }
@@ -81,7 +78,9 @@ client.on("interactionCreate", async (interaction) => {
                 } else { // If no result is found in the DB, reply with the same error message
                     await interaction.editReply({embeds: [getHomeworkEmbed(true)], ephemeral: true});
                 }
-            });            
+            } catch (error) {
+                throw error;
+            }            
         }
     }
 });

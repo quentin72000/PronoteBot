@@ -26,44 +26,36 @@ module.exports = {
                 var dueDate = moment(value.for);
 
                 let description = value.description.replaceAll('"', '""').replaceAll("'", "''") // Prevent non escaped caracter error.
-                
-            await db.get(`SELECT * FROM homework WHERE id="${value.id}"`, async (err, result) => {
-                    if (err) throw err;
-
+                try {
+                    let result = await db.prepare(`SELECT * FROM homework WHERE id=?`).get(value.id);
                     if (!result) { // if the homework is not in the db, add it...
                         console.log("Adding a new homework to db...")
                         await getEmbed(value).then(async(embed)=> {
                             await client.channels.cache.get(config.channels.homework).send(embed).then(async (msg) => {
-                                await db.run(`INSERT INTO homework (id, matiere, description, date_rendue, date_donne, fait, message_id) VALUES ('${value.id}', '${value.subject}', '${description}', '${value.for.toISOString()}', '${value.givenAt.toISOString()}', 0, ${msg.id})`, (err) => {
-                                    if (err) console.error(err)
-                                })
+                                await db.prepare(`INSERT INTO homework (id, matiere, description, date_rendue, date_donne, fait, message_id) VALUES (?, ?, ?, ?, ?, 0, ?)`).run(value.id, value.subject, description, value.for.toISOString(), value.givenAt.toISOString(), msg.id)
                             })
                         })
-                        
-    
-                        
-                        
-                    } else if ((value.done === true && result.fait === 0) || dueDate.isBefore()) { // si de devoir existe et que le devoir est fait mais n'est pas marqué comme fait dans la db OU que la date pour rendre le devoir est dépassé, update la valeur "fait" à 1 (true) et SUPPRIME le message du channel homework
+
+
+                    }else if ((value.done === true && result.fait === 0) || dueDate.isBefore()) { // si de devoir existe et que le devoir est fait mais n'est pas marqué comme fait dans la db OU que la date pour rendre le devoir est dépassé, update la valeur "fait" à 1 (true) et SUPPRIME le message du channel homework
                         await client.channels.cache.get(config.channels.homework).messages.fetch(result.message_id).then(async (msg) => {
                             msg.delete().then(async () => {
-                                await db.run(`UPDATE homework SET fait=1 WHERE id="${result.id}"`, (err) => {
-                                    if (err) console.error(err)
-                                })
+                                await db.prepare(`UPDATE homework SET fait=1 WHERE id=?`).run(result.id)
                             })
                         })
 
                     } else if (value.done === false && result.fait === 1) { // si le devoir est marqué dans la DB comme fait alors qu'il ne l'est pas sur pronote, repostez le message et remetre la valeur fait à 0 (false) dans la DB.
                         await getEmbed(value).then(async(embed) => {
                             await client.channels.cache.get(client.config.channels.homework).send(embed).then(async (msg) => {
-                                await db.run(`UPDATE homework SET fait=0, message_id=${msg.id} WHERE id='${value.id}'`)
+                                await db.prepare(`UPDATE homework SET fait=0, message_id=${msg.id} WHERE id='${value.id}'`).run(msg.id, value.id)
                             })
                         })
-                        
                     }
-
-                })
+                } catch (error) {
+                    throw error;
+                }
             }
-        }) 
+        })
         client.pronote.logout(session, taskName) // Loging out at the end because files can't be access if session is closed.
     },
     task: {

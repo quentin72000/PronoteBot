@@ -1,17 +1,17 @@
 const {Client, Collection, Intents } = require('discord.js')
 require('dotenv').config();
 
-const sqlite = require('sqlite3')
+const sqlite = require('better-sqlite3')
 const fs = require("fs")
 
 // DB Creation check
 let db;
 (async() => {
     if(!fs.existsSync("data.db")){
-        db = new sqlite.Database('./data.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
+        db = new sqlite('./data.db');
         await createDB(db);
     }
-    else db = new sqlite.Database('./data.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
+    else db = new sqlite('./data.db');
 })()
 
 
@@ -40,7 +40,8 @@ require("./handler")(client);
 
 
 async function createDB(db){
-    db.exec(`
+    try {
+        db.exec(`
         CREATE TABLE "changementedt" (
             "id" TEXT NOT NULL,
             "timestamp" INTEGER,
@@ -66,8 +67,6 @@ async function createDB(db){
             "moyenne" INTEGER,
             "moyenne_classe" INTEGER
         );
-        
-        INSERT INTO moyenne (matiere) VALUES ("global");
 
         CREATE TABLE "config" (
             "name"	TEXT NOT NULL UNIQUE,
@@ -82,12 +81,11 @@ async function createDB(db){
             "reminder_start"	INTEGER DEFAULT 0,
             "reminder_before_end"	INTEGER DEFAULT 0,
             "reminder_end"	INTEGER DEFAULT 0
-        );
-    `, async(err) => {
-        if(err){
-            console.log("Cannot create DB... Aborting...")
-            throw err;
-        }
-        console.log("DB successfully created !");
-    });
+    );`);
+    db.prepare('INSERT INTO moyenne (matiere) VALUES (?)').run("global");
+    console.log("DB successfully created !");
+    } catch (error) {
+        console.log("Cannot create DB... Aborting...")
+        throw error;
+    }
 }
