@@ -35,7 +35,7 @@ module.exports = {
         const absentChannel = await client.channels.cache.get(config.channels.timetableChange)
 
 
-        await session.timetable(new Date(2023, 4, 10)).then(async(timetable) => new Promise(async(resolve, reject) => {
+        await session.timetable().then(async(timetable) => new Promise(async(resolve, reject) => {
             await client.pronote.logout(session, taskName)
             
             // Timetable embed update part
