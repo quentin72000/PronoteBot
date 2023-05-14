@@ -23,7 +23,6 @@ module.exports = {
         if(!timetableMsgID) resolve(await createTimetableMsg(db, timetableChannel))
         else {
             let message = await timetableChannel.messages.fetch(timetableMsgID.value).catch(async(err) => { // If message not found, recreate it
-                if(err) throw err;
                 resolve(await createTimetableMsg(db, timetableChannel))
             })
 
@@ -76,7 +75,7 @@ module.exports = {
                             absentChannel.send({ embeds: [embed], content: content })
                             sqlInsertStm.run(cours.id, coursDate.getTime()/1000, cours.teacher, cours.subject, cours.status)
                         }
-                        else if ('conditionAnnule'){
+                        else if (conditionAnnule){
                             const embed = new MessageEmbed()
                                 .setTitle(`__Cours annulé__ : ${cours.teacher}`)
                                 .setDescription(`**Salle :** ${cours.room ? cours.room : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:F>`)
