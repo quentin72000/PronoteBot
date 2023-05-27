@@ -27,7 +27,7 @@ module.exports = {
                             await channel.send({
                                 embeds: [{
                                     title: ":arrow_upper_right: Votre moyenne a augmenté !",
-                                    description: `\`+${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc}${changes.length ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
+                                    description: `\`+${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc}${changes.length > 0 ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
                                     color: 'GREEN'
                                 }],
                                 content: content
@@ -39,7 +39,7 @@ module.exports = {
                             await channel.send({
                                 embeds: [{
                                     title: ":arrow_lower_right: Votre moyenne a baissé !",
-                                    description: `\`-${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc} ${changes.length !== 0 ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
+                                    description: `\`-${diff(global.moyenne, m)}\` \n\`Avant:\` ${global.moyenne}\n\`Aprés:\` ${m}\n\n\`Moyenne de la classe:\` ${mc} ${changes.length > 0 ? "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("") : ""}`,
                                     color: 'RED'
 
                                 }],
@@ -100,7 +100,7 @@ async function initializeMatiere(moyennes, m, mc) {
         let globalData = await db.prepare("SELECT * FROM moyenne WHERE matiere = ?").run('global') // insert the global moyenne in the table with the actual global moyenne if not exist
         if (!globalData) {
             console.log("Inserting global in the table moyenne.")
-            await db.run(`INSERT INTO moyenne (matiere, moyenne, moyenne_classe) VALUES (?, ?, ?)`).run('global', m, mc)
+            await db.prepare(`INSERT INTO moyenne (matiere, moyenne, moyenne_classe) VALUES (?, ?, ?)`).run('global', m, mc)
             
         }
         
@@ -115,17 +115,15 @@ async function checkMoyenneUpdateForMatters(moyennes, callback) {
     let changes = []
     moyennes.subjects.forEach(async (matter) => {
         try {
-            let data =  db.prpeare(`SELECT * FROM moyenne WHERE matiere = ?`).get(matter.name)
+            let data =  db.prepare(`SELECT * FROM moyenne WHERE matiere = ?`).get(matter.name)
             if (!data) await initializeMatiere()
             else if (data.moyenne != matter.averages.student) {
-                if (data.moyenne < matter.averages.student) {
-                    changes.push({
-                        matter: matter.name,
-                        old: data.moyenne,
-                        new: matter.averages.student
-                    });
-                    db.prepare(`UPDATE moyenne SET moyenne = ?, moyenne_classe=? WHERE matiere=?`).run(matter.averages.student, matter.averages.studentClass, matter.name)
-                }
+                changes.push({
+                    matter: matter.name,
+                    old: data.moyenne,
+                    new: matter.averages.student
+                });
+                db.prepare(`UPDATE moyenne SET moyenne = ?, moyenne_classe=? WHERE matiere=?`).run(matter.averages.student, matter.averages.studentClass, matter.name)
             }
         } catch (error) {
             throw error;

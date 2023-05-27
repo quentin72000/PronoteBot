@@ -28,7 +28,7 @@ module.exports = {
                 let description = value.description.replaceAll('"', '""').replaceAll("'", "''") // Prevent non escaped caracter error.
                 try {
                     let result = await db.prepare(`SELECT * FROM homework WHERE id=?`).get(value.id);
-                    if (!result) { // if the homework is not in the db, add it...
+                    if (!result && value.done === false) { // if the homework is not in the db AND not already done, add it...
                         console.log("Adding a new homework to db...")
                         await getEmbed(value).then(async(embed)=> {
                             await client.channels.cache.get(config.channels.homework).send(embed).then(async (msg) => {
@@ -42,12 +42,18 @@ module.exports = {
                             msg.delete().then(async () => {
                                 await db.prepare(`UPDATE homework SET fait=1 WHERE id=?`).run(result.id)
                             })
+                        }).catch(async(err) => {
+                            if(err.code === 10008){ // if the message is not found, update the value "fait" to 1 (true)
+                                await db.prepare(`UPDATE homework SET fait=1 WHERE id=?`).run(result.id)
+                            } else {
+                                throw err;
+                            }
                         })
 
                     } else if (value.done === false && result.fait === 1) { // si le devoir est marqué dans la DB comme fait alors qu'il ne l'est pas sur pronote, repostez le message et remetre la valeur fait à 0 (false) dans la DB.
                         await getEmbed(value).then(async(embed) => {
                             await client.channels.cache.get(client.config.channels.homework).send(embed).then(async (msg) => {
-                                await db.prepare(`UPDATE homework SET fait=0, message_id=${msg.id} WHERE id='${value.id}'`).run(msg.id, value.id)
+                                await db.prepare(`UPDATE homework SET fait=0, message_id=? WHERE id=?`).run(msg.id, value.id)
                             })
                         })
                     }
