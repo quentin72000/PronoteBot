@@ -28,15 +28,15 @@ module.exports = {
                 let description = value.description.replaceAll('"', '""').replaceAll("'", "''") // Prevent non escaped caracter error.
                 try {
                     let result = await db.prepare(`SELECT * FROM homework WHERE id=?`).get(value.id);
-                    if (!result && value.done === false) { // if the homework is not in the db AND not already done, add it...
-                        console.log("Adding a new homework to db...")
-                        await getEmbed(value).then(async(embed)=> {
-                            await client.channels.cache.get(config.channels.homework).send(embed).then(async (msg) => {
-                                await db.prepare(`INSERT INTO homework (id, matiere, description, date_rendue, date_donne, fait, message_id) VALUES (?, ?, ?, ?, ?, 0, ?)`).run(value.id, value.subject, description, value.for.toISOString(), value.givenAt.toISOString(), msg.id)
+                    if (!result) {
+                        if(!value.done){
+                            console.log("Adding a new homework to db...")
+                            await getEmbed(value).then(async(embed)=> {
+                                await client.channels.cache.get(config.channels.homework).send(embed).then(async (msg) => {
+                                    await db.prepare(`INSERT INTO homework (id, matiere, description, date_rendue, date_donne, fait, message_id) VALUES (?, ?, ?, ?, ?, 0, ?)`).run(value.id, value.subject, description, value.for.toISOString(), value.givenAt.toISOString(), msg.id)
+                                })
                             })
-                        })
-
-
+                        } 
                     }else if ((value.done === true && result.fait === 0) || dueDate.isBefore()) { // si de devoir existe et que le devoir est fait mais n'est pas marqué comme fait dans la db OU que la date pour rendre le devoir est dépassé, update la valeur "fait" à 1 (true) et SUPPRIME le message du channel homework
                         await client.channels.cache.get(config.channels.homework).messages.fetch(result.message_id).then(async (msg) => {
                             msg.delete().then(async () => {
