@@ -24,8 +24,8 @@ console.warn("⚠ This script will delete all the data from the DB (except the c
 readline.question("Are you sure you want to delete all the data from the DB? (y/n) ", async(answer) => {
     try {
         if (answer === "y") {
-            console.log("Deleting all the data from the DB...");
-            await deleteDB();
+            console.log("Deleting all the data from the DB and recreating...");
+            await recreateDB();
         } else {
             console.log("Aborting...");
         }
@@ -37,8 +37,8 @@ readline.question("Are you sure you want to delete all the data from the DB? (y/
 });
 
 
-async function deleteDB() {
-    const db = new sqlite.Database("./data.db", sqlite.OPEN_READWRITE);
+async function recreateDB() {
+    const db = new sqlite("./data.db");
     try {
         // Delete all the tables from the DB
 
@@ -75,8 +75,6 @@ async function deleteDB() {
             "moyenne_classe" INTEGER
         );
         
-        INSERT INTO moyenne (matiere) VALUES ("global");
-
         CREATE TABLE IF NOT EXISTS "config" (
             "name" TEXT NOT NULL UNIQUE,
             "value" TEXT
@@ -91,11 +89,13 @@ async function deleteDB() {
             "reminder_before_end" INTEGER DEFAULT 0,
             "reminder_end" INTEGER DEFAULT 0
         );`);
-
-        console.log("DB successfully created !");
+        db.prepare("INSERT INTO moyenne (matiere) VALUES (?);").run("global");
 
     } catch (error) {
-        console.log("Cannot create DB... Aborting...");
+        throw new Error("Cannot create DB... Aborting... " + error);
+    } finally {
+        console.log("DB successfully recreated !");
+        db.close();
     }
 }
 
