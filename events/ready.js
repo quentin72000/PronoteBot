@@ -1,27 +1,35 @@
 const client = require("../index");
-let fs = require("fs")
-const CronJob = require('cron').CronJob;
+const fs = require("fs");
+const { CronJob } = require("cron");
 
-client.on('ready', async () => {
-    let tasks = {}
-    console.log(client.user.tag + ' is ready !')
+const tasksFiles = fs.readdirSync("./tasks").filter(file => file.endsWith(".js"));
 
-    const  taksFiles = fs.readdirSync("./tasks").filter(file => file.endsWith('.js')); // get the name of every js file in the tasks folder.
-    for(const file of taksFiles){ // require all tasks file and set the cron.
+client.on("ready", async() => {
+    const tasks = {};
+    console.log(client.user.tag + " is ready !");
+
+    for (const file of tasksFiles) {
         const task = require(`../tasks/${file}`);
-        
-        let taskConfig = client.config.tasksConfig?.find(taskConfig => taskConfig.name === task.task.name)
-        if(taskConfig && taskConfig.enabled === false){ // if the task is disabled in the config, skip it.
+
+        const taskConfig = client.config.tasksConfig?.find(currentTaskConfig =>
+            currentTaskConfig.name === task.task.name
+        );
+        if (taskConfig && !taskConfig.enabled) {
             console.warn("Task", task.task.name, "is disabled in the config, skipping it.");
             continue;
         }
-        
-        console.log("Loading task",task.task.name)
-        tasks[task.task.name] = task // save the task in the tasks object.
-        
-        if(task.task.cron){new CronJob(task.task.cron, task.run, null, true, client.config.timezone ? client.config.timezone : "Europe/Paris", null, task.task.runOnStartup)}
+
+        console.log("Loading task",task.task.name);
+        tasks[task.task.name] = task;
+
+        if (task.task.cron) {
+            // eslint-disable-next-line no-new
+            new CronJob(task.task.cron, task.run, null, true, client.config.timezone ?
+                client.config.timezone
+                : "Europe/Paris",
+            null,task.task.runOnStartup);
+        }
 
     }
     client.tasks = tasks;
-    
 });

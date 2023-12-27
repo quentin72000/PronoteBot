@@ -1,52 +1,47 @@
 module.exports = {
     name: "pronote",
     description: "Liste de petite commande qui donne des informations de pronote.",
-    type: 'CHAT_INPUT',
+    type: "CHAT_INPUT",
     options: [{
-            name: "version",
-            type: "SUB_COMMAND",
-            description: "Donne la version du serveur pronote.",
-        },
-        {
-            name: "etablisement",
-            type: "SUB_COMMAND",
-            description: "Donne le nom et des info sur l'établisment de votre page pronote.",
-        }
+        name: "version",
+        type: "SUB_COMMAND",
+        description: "Donne la version du serveur pronote.",
+    },
+    {
+        name: "etablisement",
+        type: "SUB_COMMAND",
+        description: "Donne le nom et des info sur l'établisment de votre page pronote.",
+    }
     ],
-    /**
-     *
-     * @param {Client} client
-     * @param {CommandInteraction} interaction
-     * @param {String[]} args
-     */
-    run: async (client, interaction, args) => {
-        let session = await client.pronote.login()
+
+    run: async(client, interaction, args) => {
+        const session = await client.pronote.login();
         if (args[0] === "version") {
-            return interaction.editReply("Version du serveur pronote: " + session.params.version)
+            return interaction.editReply("Version du serveur pronote: " + session.params.version);
         } else if (args[0] === "etablisement") {
 
 
-            let embeds = []
+            const embeds = [];
 
             session.user.establishmentsInfo.forEach(etablisement => {
-                let adresses = []
+                const adresses = [];
                 etablisement.address.forEach(element => { // Loop the establishment array
-                    if(element.length !== 0) adresses.push(element)
+                    if (element.length !== 0) adresses.push(element);
                 });
-                adresses.push(etablisement.city, etablisement.country) // Add the city and country to the adresses
-                
+                adresses.push(etablisement.city, etablisement.country); // Add the city and country to the adresses
+
                 embeds.push({
                     title: "Information sur " + etablisement.name,
                     description: `**Nom**: ${etablisement.name}`
-                    + `\n**Adresse**: ${adresses.join(", ")}(${etablisement.postalCode})` 
+                    + `\n**Adresse**: ${adresses.join(", ")}(${etablisement.postalCode})`
                     + `\n**Site**: [${etablisement.website}](${etablisement.website})`
-                })
-            })
+                });
+            });
 
             interaction.editReply({
                 embeds: embeds
-            })
+            });
         }
-        await client.pronote.logout(session, "/pronote")
+        await client.pronote.logout(session, "/pronote");
     }
-}
+};

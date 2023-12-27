@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "test": "eslint . --ext .js && node .",
+    "start": "node ."
   },
   "keywords": [],
   "author": "",
@@ -18,5 +21,10 @@
     "moment": "^2.29.4",
     "moment-duration-format": "^2.3.2",
     "pronote-api-maintained": "github:quentin72000/pronote-api"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "^1.5.0",
+    "eslint": "^8.55.0",
+    "eslint-plugin-n": "^16.3.1"
   }
 }

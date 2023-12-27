@@ -1,11 +1,11 @@
-let client = require("../index.js")
-let {db,config} = client;
+const client = require("../index.js");
+const { db,config } = client;
 
 
 module.exports = {
-    run: async function () {
-        let taskName = "[taskName]"
-        console.log(`Running the ${taskName} task.`)
+    run: async function() {
+        let taskName = "[taskName]";
+        console.log(`Running the ${taskName} task.`);
 
     },
     task: {

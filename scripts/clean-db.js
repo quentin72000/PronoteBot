@@ -1,40 +1,43 @@
 // Use this script to clean the DB for a new year.
 // Warning: This script will delete all the data from the DB. Please make a backup if you want to be able to restore the data later.
 
-let sqlite = require('sqlite3')
-let fs = require("fs")
+
+/* eslint-disable n/no-sync */
+const sqlite = require("better-sqlite3");
+const fs = require("fs");
 
 // Check if db exists
-if(!fs.existsSync("data.db")){
-    console.log("DB not found. Aborting...")
+if (!fs.existsSync("data.db")) {
+    console.log("DB not found. Aborting...");
     return;
 }
 
 
 // Input the user for a confirmation
-const readline = require('readline').createInterface({
+const readline = require("readline").createInterface({
     input: process.stdin,
     output: process.stdout
-    })
-    
-console.warn("⚠ This script will delete all the data from the DB (except the config). ⚠ \nPlease make a backup if you want to be able to restore the data later.")
-readline.question('Are you sure you want to delete all the data from the DB? (y/n) ', async(answer) => {
+});
+
+console.warn("⚠ This script will delete all the data from the DB (except the config). ⚠"
+  + "\nPlease make a backup if you want to be able to restore the data later.");
+readline.question("Are you sure you want to delete all the data from the DB? (y/n) ", async(answer) => {
     try {
-        if (answer === 'y') {
-          console.log('Deleting all the data from the DB...');
-          await deleteDB();
+        if (answer === "y") {
+            console.log("Deleting all the data from the DB...");
+            await deleteDB();
         } else {
-          console.log('Aborting...');
+            console.log("Aborting...");
         }
-      } catch (err) {
+    } catch (err) {
         console.error(err);
-      } finally {
+    } finally {
         readline.close();
-      }
-})
+    }
+});
 
 
-async function deleteDB (){
+async function deleteDB() {
     const db = new sqlite.Database("./data.db", sqlite.OPEN_READWRITE);
     try {
         // Delete all the tables from the DB
@@ -75,24 +78,24 @@ async function deleteDB (){
         INSERT INTO moyenne (matiere) VALUES ("global");
 
         CREATE TABLE IF NOT EXISTS "config" (
-            "name"	TEXT NOT NULL UNIQUE,
-            "value"	TEXT
+            "name" TEXT NOT NULL UNIQUE,
+            "value" TEXT
         );
 
         CREATE TABLE "holidays" (
-            "name"	TEXT,
-            "from"	INTEGER,
-            "to"	TEXT,
-            "reminder_before_start"	INTEGER DEFAULT 0,
-            "reminder_start"	INTEGER DEFAULT 0,
-            "reminder_before_end"	INTEGER DEFAULT 0,
-            "reminder_end"	INTEGER DEFAULT 0
-        );`)
+            "name" TEXT,
+            "from" INTEGER,
+            "to" TEXT,
+            "reminder_before_start" INTEGER DEFAULT 0,
+            "reminder_start" INTEGER DEFAULT 0,
+            "reminder_before_end" INTEGER DEFAULT 0,
+            "reminder_end" INTEGER DEFAULT 0
+        );`);
 
         console.log("DB successfully created !");
 
     } catch (error) {
-        console.log("Cannot create DB... Aborting...")
+        console.log("Cannot create DB... Aborting...");
     }
 }
 

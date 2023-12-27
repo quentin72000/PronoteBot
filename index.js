@@ -1,20 +1,20 @@
-const {Client, Collection, Intents } = require('discord.js')
-require('dotenv').config();
+const { Client, Collection, Intents } = require("discord.js");
+require("dotenv").config();
 
-const sqlite = require('better-sqlite3')
-const fs = require("fs")
+const sqlite = require("better-sqlite3");
+const fs = require("fs");
 
 // DB Creation check
 let db;
 (async() => {
-    if(!fs.existsSync("data.db")){
-        db = new sqlite('./data.db');
-        await createDB(db);
+    // TODO: Convert this to async fs.access
+    // eslint-disable-next-line n/no-sync
+    if (!fs.existsSync("data.db")) {
+        db = new sqlite("./data.db");
+        await createDB();
     }
-    else db = new sqlite('./data.db');
-})()
-
-
+    else db = new sqlite("./data.db");
+})();
 
 
 const client = new Client({
@@ -29,17 +29,16 @@ module.exports = client; // export client
 // Global Variables
 client.slashCommands = new Collection();
 client.config = require("./config");
-client.db = db
+client.db = db;
 
-client.pronote = require("./pronote")
+client.pronote = require("./pronote");
 
 
-client.login(process.env.BOT_TOKEN)
+client.login(process.env.BOT_TOKEN);
 require("./handler")(client);
 
 
-
-async function createDB(db){
+async function createDB() {
     try {
         db.exec(`
         CREATE TABLE "changementedt" (
@@ -69,23 +68,22 @@ async function createDB(db){
         );
 
         CREATE TABLE "config" (
-            "name"	TEXT NOT NULL UNIQUE,
-            "value"	TEXT
+            "name" TEXT NOT NULL UNIQUE,
+            "value" TEXT
         );
 
         CREATE TABLE "holidays" (
-            "name"	TEXT,
-            "from"	INTEGER,
-            "to"	TEXT,
-            "reminder_before_start"	INTEGER DEFAULT 0,
-            "reminder_start"	INTEGER DEFAULT 0,
-            "reminder_before_end"	INTEGER DEFAULT 0,
-            "reminder_end"	INTEGER DEFAULT 0
+            "name" TEXT,
+            "from" INTEGER,
+            "to" TEXT,
+            "reminder_before_start" INTEGER DEFAULT 0,
+            "reminder_start" INTEGER DEFAULT 0,
+            "reminder_before_end" INTEGER DEFAULT 0,
+            "reminder_end" INTEGER DEFAULT 0
     );`);
-    db.prepare('INSERT INTO moyenne (matiere) VALUES (?)').run("global");
-    console.log("DB successfully created !");
+        db.prepare("INSERT INTO moyenne (matiere) VALUES (?)").run("global");
+        console.log("DB successfully created !");
     } catch (error) {
-        console.log("Cannot create DB... Aborting...")
-        throw error;
+        throw new Error("Cannot create DB... Aborting... " + error);
     }
 }
