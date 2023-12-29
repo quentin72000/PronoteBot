@@ -137,7 +137,8 @@ This way you will have access to the login page. You can now ask for a username 
 
 * If your email is not set on your account and you don't have the password, you will need to use a Regional CAS.
 
-> **Note:** If you can connect directly from Pronote, the bot will work with every ENT.
+> [!TIP]
+> If you can connect directly from Pronote, the bot will work with every ENT.
 <details>
   <summary>CAS list</summary>
   
@@ -186,16 +187,16 @@ This way you will have access to the login page. You can now ask for a username 
 If your CAS or ENT is not on the list, feel free to open an Issue and I will try to help you.
 
 ## Prepare for a new school year
-You can run the script "clean-db.js" to delete all the data of the previous school year. 
+You can run the script "clean-db" to delete all the data of the previous school year. 
 This will delete all the data of the previous year and will create a new database for the new year.
 
-> **Warning**<br>
+> [!WARNING]   
 > This will delete all your previous data. <br>
 > Make sure to backup your database before running this script if you want to keep your previous data.
 
-* To run the script, run the following command in a terminal:
+* To run the script, run the following command in a terminal opened in the project folder:
 ```bash
-node scripts/clean-db.js  
+npm run script:cleandb
 ```
 
 
