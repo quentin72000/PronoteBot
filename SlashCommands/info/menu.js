@@ -1,34 +1,31 @@
+const { ApplicationCommandType, EmbedBuilder, Colors } = require("discord.js");
 module.exports = {
     name: "menu",
     description: "Renvoie le menu du jour.",
-    type: "CHAT_INPUT",
+    type: ApplicationCommandType.ChatInput,
 
     run: async(client, interaction) => {
-        let embed = {};
+        const embed = new EmbedBuilder();
         const session = await client.pronote.login();
         session.menu().then(async(menu) => {
             await client.pronote.logout(session, "/menu");
             if (!menu[0]) {
-                embed = {
-                    title: "Aucun menu disponible aujourd'hui",
-                    color: "RED"
-                };
+                embed.setTitle("Aucun menu disponible aujourd'hui")
+                    .setColor(Colors.Red);
             } else {
-                embed = {
-                    title: "Menu du " + new Date(menu[0].date).toLocaleDateString("fr"),
-                    description: ""
-                };
+                let description = "";
                 menu[0].meals[0].forEach((value) => {
                     value.forEach((item) =>{
-                        embed.description += item.name + "\n";
+                        description += item.name + "\n";
                     });
-                    embed.description += "\n";
+                    description += "\n";
                 });
+
+                embed.setTitle("Menu du " + new Date(menu[0].date).toLocaleDateString("fr"))
+                    .setDescription(description);
             }
 
-            await interaction.editReply({
-                embeds: [embed]
-            });
+            await interaction.editReply({ embeds: [embed] });
         });
     }
 };

@@ -1,5 +1,7 @@
 const config = require("../../config");
 const fs = require("fs");
+const { ApplicationCommandType, ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
+
 const tasksChoices = [];
 const taskFiles = fs.readdirSync("./tasks").filter(file => file.endsWith(".js")); // get the name of every js file in the tasks folder.
 for (const file of taskFiles) { // require all tasks file and set the cron.
@@ -14,11 +16,11 @@ for (const file of taskFiles) { // require all tasks file and set the cron.
 module.exports = {
     name: "task",
     description: "Permets de lancer une des taches disponibles.",
-    type: "CHAT_INPUT",
+    type: ApplicationCommandType.ChatInput,
     options: [
         {
             name: "nom",
-            type: "STRING",
+            type: ApplicationCommandOptionType.String,
             description: "Le nom de la tache à lancée.",
             required: true,
             choices: tasksChoices,
@@ -27,12 +29,12 @@ module.exports = {
 
     run: async(client, interaction, args) => {
         if (!client.tasks) {
-            return await interaction.editReply({ embeds: [{
-                title: "Erreur, bot non démarré.",
-                description: "Désolé, veuillez attendre le bot démarre complètement pour exécuter une tache."
-                + "\nRéessayer dans quelques minutes.",
-                color: "#FF0000"
-            }] });
+            return await interaction.editReply({ embeds: [new EmbedBuilder()
+                .setTitle("Erreur, bot non démarré.")
+                .setDescription("Désolé, veuillez attendre le bot démarre complètement pour exécuter une tache."
+                    + "\nRéessayer dans quelques minutes.")
+                .setColor("#FF0000")
+            ] });
         }
         client.tasks[args[0]].run();
         interaction.editReply("La tache a bien été lancée.");

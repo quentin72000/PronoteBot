@@ -1,3 +1,4 @@
+const { EmbedBuilder, Colors } = require("discord.js");
 const client = require("../index.js");
 const { db,config } = client;
 
@@ -21,15 +22,15 @@ module.exports = {
             const endOfSchoolYear = new Date(params.lastDay);
 
             if (isToday(endOfSchoolYear)) {
-                channel.send({ embeds: [{
-                    title: "Fin de l'année scolaire",
-                    description: "L'année scolaire est terminée ! **Bonne vacances !**"
-                    + "\n\n N'oubliez pas de faire **un nettoyage de la base de données** pour préparer la nouvelle "
-                    + "année, en utilisant le script `cleanDB.js` dans le dossier `scripts` ! "
-                    + "(voir [le readme](https://github.com/quentin72000/PronoteBot#prepare-for-a-new-school-year) "
-                    + "pour plus d'informations)",
-                    color: "GREEN"
-                }] });
+                const embed = new EmbedBuilder()
+                    .setTitle("Fin de l'année scolaire")
+                    .setDescription("L'année scolaire est terminée ! **Bonne vacances !**"
+                        + "\n\n N'oubliez pas de faire **un nettoyage de la base de données** pour préparer la nouvelle"
+                        + " année, en utilisant le script `cleanDB.js` dans le dossier `scripts` ! "
+                        + "(voir [le readme](https://github.com/quentin72000/PronoteBot#prepare-for-a-new-school-year) "
+                        + "pour plus d'informations)")
+                    .setColor(Colors.Green);
+                channel.send({ embeds: [embed] });
             }
         }
 
@@ -94,40 +95,45 @@ module.exports = {
 
                 if ((diffInDays <= 3)) { // If the holidays are "short" holidays, supose it's a national holidays (férié)
                     if (isBefore2Days(start) && result.reminder_before_start === 0) {
-                        await channel.send({ embeds: [{
-                            title: diffInDays > 0 ? `Les jours férié \`${name}\` approchent !`
-                                : `Le jour férié \`${name}\` approche !`,
-                            description: `${diffInDays > 0 ? `Les jours férié \`${name}\` vont`
-                                : `Le jour férié \`${name}\` va `} commencer **dans 2 jours**`
-                                 + `(<t:${Math.floor((start.getTime() / 1000))}:R>) !`,
-                            color: "GREEN",
-                            fields: fields
-                        }], content: content });
+                        const embed = new EmbedBuilder()
+                            .setTitle(diffInDays > 0 ?
+                                `Les jours férié \`${name}\` approchent !`
+                                : `Le jour férié \`${name}\` approche !`)
+                            .setDescription((diffInDays > 0 ?
+                                `Les jours férié \`${name}\` vont`
+                                : `Le jour férié \`${name}\` va `)
+                            + `commencer **dans 2 jours** (<t:${Math.floor((start.getTime() / 1000))}:R>) !`)
+                            .setColor(Colors.Green)
+                            .addFields(fields);
+
+                        channel.send({ embeds: [embed], content: content });
                         await db.prepare("UPDATE holidays SET reminder_before_start = 1 WHERE name =? AND \"from\" =?")
                             .run(value.name ? value.name : "none", start.toISOString());
                     }
 
                     if (isToday(start) && result.reminder_start === 0) {
-                        await channel.send({ embeds: [{
-                            title: diffInDays > 0 ? `Les jours férié \`${name}\` ont commencé !`
-                                : `Le jour férié \`${name}\` a commencé !`,
-                            description: diffInDays > 0 ? `Les jours férié \`${name}\` ont commencé !
-                             \n\n**Bon jours férié !**`
-                                : `Le jour férié \`${name}\` a commencé ! \n\n**Bon jour férié !**`,
-                            color: "DARK_GREEN",
-                            fields: fields
-                        }], content: content });
+                        const embed = new EmbedBuilder()
+                            .setTitle(diffInDays > 0 ? `Les jours férié \`${name}\` ont commencé !`
+                                : `Le jour férié \`${name}\` a commencé !`)
+                            .setDescription(diffInDays > 0 ? `Les jours férié \`${name}\` ont commencé !
+                                \n\n**Bon jours férié !**`
+                                : `Le jour férié \`${name}\` a commencé ! \n\n**Bon jour férié !**`)
+                            .setColor(Colors.DarkGreen)
+                            .addFields(fields);
+
+                        await channel.send({ embeds: [embed], content: content });
                         await db.prepare("UPDATE holidays SET reminder_start = 1 WHERE name =? AND \"from\" =?")
                             .run(value.name ? value.name : "none", start.toISOString());
                     }
 
                     if (diffInDays >= 1 && isToday(end) && result.reminder_end === 0) {
-                        await channel.send({ embeds: [{
-                            title: `Les jours férié \`${name}\` sont terminés !`,
-                            description: `Les jours férié \`${name}\` sont terminés ! \n\n**Bonne rentrée !**`,
-                            color: "DARK_ORANGE",
-                            fields: fields
-                        }], content: content });
+                        const embed = new EmbedBuilder()
+                            .setTitle(`Les jours férié \`${name}\` sont terminés !`)
+                            .setDescription(`Les jours férié \`${name}\` sont terminés ! \n\n**Bonne rentrée !**`)
+                            .setColor(Colors.DarkOrange)
+                            .addFields(fields);
+
+                        await channel.send({ embeds: [embed], content: content });
                         await db.prepare("UPDATE holidays SET reminder_end = 1 WHERE name =? AND \"from\" =?")
                             .run(value.name ? value.name : "none", start.toISOString());
                     }
@@ -135,47 +141,51 @@ module.exports = {
                 } else { // If the holidays is a school holidays
 
                     if (isBefore2Days(start) && result.reminder_before_start === 0) {
-                        await channel.send({ embeds: [{
-                            title: "Le début des vacances approche !",
-                            description: `Les vacances \`${name}\` vont commencer **dans 2 jours** 
-                            (<t:${Math.floor(start.getTime() / 1000)}:R>) ! \n\n**Bonne fin de semaine !**`,
-                            color: "GREEN",
-                            fields: fields
-                        }], content: content });
+                        const embed = new EmbedBuilder()
+                            .setTitle("Le début des vacances approche !")
+                            .setDescription(`Les vacances \`${name}\` vont commencer **dans 2 jours** `
+                            + `(<t:${Math.floor(start.getTime() / 1000)}:R>) ! \n\n**Bonne fin de semaine !**`)
+                            .setColor(Colors.Green)
+                            .addFields(fields);
+
+                        await channel.send({ embeds: [embed], content: content });
                         await db.prepare("UPDATE holidays SET reminder_before_start = 1 WHERE name =? AND \"from\" =?")
                             .run(value.name ? value.name : "none", start.toISOString());
                     }
 
                     if (isToday(start) && result.reminder_start === 0) {
-                        await channel.send({ embeds: [{
-                            title: "Début des vacances",
-                            description: `Les vacances \`${name}\` ont commencé ! \n**Bonne vacances !**`,
-                            color: "DARK_GREEN",
-                            fields: fields
-                        }], content: content });
+                        const embed = new EmbedBuilder()
+                            .setTitle("Début des vacances")
+                            .setDescription(`Les vacances \`${name}\` ont commencé ! \n**Bonne vacances !**`)
+                            .setColor(Colors.DarkGreen)
+                            .addFields(fields);
+
+                        await channel.send({ embeds: [embed], content: content });
                         await db.prepare("UPDATE holidays SET reminder_start = 1 WHERE name =? AND \"from\" =?")
                             .run(value.name ? value.name : "none", start.toISOString());
                     }
 
                     if (isBefore2Days(end) && result.reminder_before_end === 0) {
-                        await channel.send({ embeds: [{
-                            title: "La fin des vacances approche !",
-                            description: `Les vacances \`${name}\` vont se terminer **dans 2 jours** `
+                        const embed = new EmbedBuilder()
+                            .setTitle("La fin des vacances approche !")
+                            .setDescription(`Les vacances \`${name}\` vont se terminer **dans 2 jours** `
                                 + `(<t:${Math.floor(end.getTime() / 1000)}:R>) ! \n\n`
-                                + "**N'oubliez pas de faire vos devoirs !**",
-                            color: "ORANGE",
-                            fields: fields
-                        }], content: content });
+                                + "**N'oubliez pas de faire vos devoirs !**")
+                            .setColor(Colors.Orange)
+                            .addFields(fields);
+
+                        await channel.send({ embeds: [embed], content: content });
                         await db.prepare("UPDATE holidays SET reminder_before_end = 1 WHERE name =? AND \"from\" =?")
                             .run(value.name ? value.name : "none", start.toISOString());
                     }
 
                     if (isToday(end) && result.reminder_end === 0) {
-                        await channel.send({ embeds: [{
-                            title: "Fin des vacances",
-                            description: `Les vacances \`${name}\` sont terminées ! \n\n**Bonne rentrée !**`,
-                            color: "DARK_ORANGE"
-                        }], content: content });
+                        const embed = new EmbedBuilder()
+                            .setTitle("Fin des vacances")
+                            .setDescription(`Les vacances \`${name}\` sont terminées ! \n\n**Bonne rentrée !**`)
+                            .setColor(Colors.DarkOrange);
+
+                        await channel.send({ embeds: [embed], content: content });
                         await db.prepare("UPDATE holidays SET reminder_end = 1 WHERE name =? AND \"from\" =?")
                             .run(value.name ? value.name : "none", start.toISOString());
                     }

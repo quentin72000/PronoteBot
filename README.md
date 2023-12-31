@@ -73,7 +73,6 @@ BOT_TOKEN=YOUR DISCORD BOT TOKEN
 
 ```js
 module.exports = {
-  
     timezone: "Europe/Paris", // Your timezone, used for the cronjobs. (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
     notificationUserId: "user id", // Discord user id that will be notified for certain event (in general, it's the pronote account owner)
     slashCommandGuildId: "slash command guild id", // The Discord guild id where the slash commands will be added.
@@ -82,12 +81,13 @@ module.exports = {
         moyenne: "channel id for moyenne", // Discord channel id for the averages updates
         timetableChange: "channel id for timetable change", // Discord channel id for the timetable changes (missing teacher...)
         timetable: "channel id for the timetable embed", // Discord Channel id for the live timetable embed
+        announcement: "channel id for announcements" // Discord Channel id for the announcements (like the end of school year)
     },
     colors: { // Bypass default color of a subject if you don't like it or if the color is confusing. The name must be the same as what you see in your timetable to work !
-            "subject name": "#customColor", 
-            // "SCIENCES VIE & TERRE": "#38c219", // example
+        "subject name": "#customColor",
+        // "SCIENCES VIE & TERRE": "#38c219", // example
     },
-    
+
     tasksConfig: [
         {
             name: "informEvent",
@@ -122,7 +122,7 @@ module.exports = {
             }
         }
     ]
-}
+};
 ```
 
 6. Run the program
@@ -209,4 +209,4 @@ Technologies used in the project:
 
 *   Node.JS
 *   [Modified version](https://github.com/quentin72000/pronote-api) of Litarvan/pronote-api
-*   Discord.js V13
+*   Discord.js V14

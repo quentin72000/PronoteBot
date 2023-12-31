@@ -2,7 +2,7 @@ const client = require("../index.js");
 
 const { db,config } = client;
 
-const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, RESTJSONErrorCodes } = require("discord.js");
 
 
 module.exports = {
@@ -27,7 +27,7 @@ module.exports = {
             await client.pronote.logout(session, taskName);
 
             // Timetable embed update part
-            const timetableEmbed = new MessageEmbed()
+            const timetableEmbed = new EmbedBuilder()
                 .setColor("#0099ff");
             timetableEmbed.setTimestamp();
             timetableEmbed.setFooter({ text: "Mis à jour le: " });
@@ -73,7 +73,7 @@ module.exports = {
                         if (result.some(value => value.id === cours.id)) return null; // If already sent, stop
                         const sqlInsertStm = db.prepare("INSERT INTO changementedt VALUES (?, ?, ?, ?, ?)");
                         if (conditionAbsent || conditionAnnule) {
-                            const embed = new MessageEmbed();
+                            const embed = new EmbedBuilder();
                             if (conditionAbsent) {
                                 embed.setTitle(`__Professeur absent__ : ${cours.teacher}`)
                                     .setDescription(`**Salle :** ${cours.room ? cours.room
@@ -97,7 +97,12 @@ module.exports = {
                     }
                     return null;
                 });
-                timetableMsg.edit({ embeds: [timetableEmbed] });
+                timetableMsg.edit({ embeds: [timetableEmbed] }).catch((err) => {
+                    if (err.code === RESTJSONErrorCodes.MissingPermissions) {
+                        throw new Error("Can't edit the timetable message. The bot don't have the right permission.");
+                    }
+                    throw new Error("Can't edit the timetable message. Please check your config or bot permissions.");
+                });
             }
         });
 
@@ -113,21 +118,24 @@ module.exports = {
 async function createTimetableMsg(timetableChannel) {
     console.log("Timetable message not found... (re)creating...");
 
-
-    const row = new MessageActionRow()
+    const row = new ActionRowBuilder()
         .addComponents(
-            new MessageButton()
+            new ButtonBuilder()
                 .setCustomId("refresh_timetable")
                 .setLabel("Actualiser l'emploi du temps")
-                .setStyle("SECONDARY")
+                .setStyle(ButtonStyle.Secondary)
                 .setEmoji("🔄"),
         );
-    const message = await timetableChannel.send({ embeds: [{
-        title: "Emploi du temps.",
-        description: "Initialisation..."
-    }], components: [row] });
+    const embed = new EmbedBuilder()
+        .setTitle("Emploi du temps.")
+        .setDescription("Initialisation...");
 
-    if (!message) throw new Error("Can't send timetable message. Please check your config or bot permissions.");
+    const message = await timetableChannel.send({ embeds: [embed], components: [row] }).catch((err) => {
+        if (err.code === RESTJSONErrorCodes.MissingPermissions) {
+            throw new Error("Can't send the timetable message. The bot don't have the right permission.");
+        }
+        throw new Error("Can't send the timetable message. Please check your config or bot permissions.");
+    });
     await db.prepare("INSERT OR REPLACE INTO config (name, value) VALUES (?, ?)").run("timeTableMsgID", message.id);
 
     return message;
@@ -141,7 +149,7 @@ async function getTimetableMessage(timetableChannel) {
 
     let message;
     try {
-        message = await timetableChannel.messages.fetch(timetableMsgID.value);
+        message = await timetableChannel.messages.fetch({ message: timetableMsgID.value, cache: false, force: true });
     } catch (err) {
         return createTimetableMsg(timetableChannel);
     }

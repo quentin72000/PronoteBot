@@ -1,5 +1,5 @@
 const client = require("../index");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
 
 client.on("interactionCreate", async(interaction) => {
     // Slash Command Handling
@@ -7,12 +7,12 @@ client.on("interactionCreate", async(interaction) => {
         await interaction.deferReply({ ephemeral: false });
 
         const cmd = client.slashCommands.get(interaction.commandName);
-        if (!cmd) return interaction.followUp({ content: "An error has occured" });
+        if (!cmd) return interaction.followUp({ content: "Une erreur est survenue, la commande n'existe pas." });
 
         const args = [];
 
         for (const option of interaction.options.data) {
-            if (option.type === "SUB_COMMAND") {
+            if (option.type === ApplicationCommandOptionType.Subcommand) {
                 if (option.name) args.push(option.name);
                 option.options?.forEach((x) => {
                     if (x.value) args.push(x.value);
@@ -25,7 +25,7 @@ client.on("interactionCreate", async(interaction) => {
     }
 
     // Context Menu Handling
-    if (interaction.isContextMenu()) {
+    if (interaction.isContextMenuCommand()) {
         await interaction.deferReply({ ephemeral: false });
         const command = client.slashCommands.get(interaction.commandName);
         if (command) command.run(client, interaction);
@@ -95,10 +95,10 @@ client.on("interactionCreate", async(interaction) => {
 
 
 function getHomeworkEmbed(error) {
-    if (error) return new MessageEmbed()
+    if (error) return new EmbedBuilder()
         .setTitle("Erreur: Devoir non trouvé !")
         .setColor("RED");
-    return new MessageEmbed()
+    return new EmbedBuilder()
         .setTitle("Devoir marqué comme fait !")
         .setColor("GREEN");
 }

@@ -1,15 +1,17 @@
+const { ApplicationCommandType, ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
+
 module.exports = {
     name: "pronote",
     description: "Liste de petite commande qui donne des informations de pronote.",
-    type: "CHAT_INPUT",
+    type: ApplicationCommandType.ChatInput,
     options: [{
         name: "version",
-        type: "SUB_COMMAND",
+        type: ApplicationCommandOptionType.Subcommand,
         description: "Donne la version du serveur pronote.",
     },
     {
         name: "etablisement",
-        type: "SUB_COMMAND",
+        type: ApplicationCommandOptionType.Subcommand,
         description: "Donne le nom et des info sur l'établisment de votre page pronote.",
     }
     ],
@@ -29,18 +31,15 @@ module.exports = {
                     if (element.length !== 0) adresses.push(element);
                 });
                 adresses.push(etablisement.city, etablisement.country); // Add the city and country to the adresses
-
-                embeds.push({
-                    title: "Information sur " + etablisement.name,
-                    description: `**Nom**: ${etablisement.name}`
-                    + `\n**Adresse**: ${adresses.join(", ")}(${etablisement.postalCode})`
-                    + `\n**Site**: [${etablisement.website}](${etablisement.website})`
-                });
+                embeds.push(new EmbedBuilder()
+                    .setTitle("Information sur " + etablisement.name)
+                    .setDescription(`**Nom**: ${etablisement.name}`
+                        + `\n**Adresse**: ${adresses.join(", ")}(${etablisement.postalCode})`
+                        + `\n**Site**: [${etablisement.website}](${etablisement.website})`)
+                );
             });
 
-            interaction.editReply({
-                embeds: embeds
-            });
+            interaction.editReply({ embeds: embeds });
         }
         await client.pronote.logout(session, "/pronote");
     }

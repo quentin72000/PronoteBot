@@ -1,4 +1,4 @@
-const { Client, Collection, Intents } = require("discord.js");
+const { Client, Collection, GatewayIntentBits, RESTJSONErrorCodes } = require("discord.js");
 require("dotenv").config();
 
 const sqlite = require("better-sqlite3");
@@ -19,8 +19,8 @@ let db;
 
 const client = new Client({
     intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MESSAGES,
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
     ]
 });
 
@@ -34,7 +34,13 @@ client.db = db;
 client.pronote = require("./pronote");
 
 
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN).catch((err) => {
+    if (err.code === RESTJSONErrorCodes.InvalidToken || err.code === "TokenInvalid") {
+        throw new Error("Can't login. The bot token is invalid.");
+    }
+    console.error("Can't login. Please check your config or bot token.");
+    throw err;
+});
 require("./handler")(client);
 
 

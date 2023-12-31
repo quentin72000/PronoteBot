@@ -4,7 +4,7 @@ const client = require("../index.js");
 const { db,config } = client;
 
 
-const { MessageAttachment, MessageActionRow, MessageButton } = require("discord.js");
+const { AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
 
 
 module.exports = {
@@ -39,7 +39,8 @@ module.exports = {
 
                     }
                 } else if ((value.done === true && result.fait === 0) || moment(value.for).isBefore()) { // si de devoir existe et que le devoir est fait mais n'est pas marqué comme fait dans la db OU que la date pour rendre le devoir est dépassé, update la valeur "fait" à 1 (true) et SUPPRIME le message du channel homework
-                    await client.channels.cache.get(config.channels.homework).messages.fetch(result.message_id)
+                    await client.channels.cache.get(config.channels.homework)
+                        .messages.fetch({ message: result.message_id, cache: false, force: true })
                         .then(async(msg) => {
                             msg.delete().then(async() => {
                                 await db.prepare("UPDATE homework SET fait=1 WHERE id=?").run(result.id);
@@ -82,7 +83,7 @@ async function parseFiles(files) {
 
     files.forEach(async(file) => {
         if (file.type === 1) { // File
-            result.files.push(new MessageAttachment(file.url, file.name));
+            result.files.push(new AttachmentBuilder(file.url, { name: file.name }));
         } else if (file.type === 0) { // Link, parse it to discord
             links.push(`[${file.name ? file.name : file.url}](${file.url})`);
         }
@@ -103,26 +104,17 @@ async function getEmbed(homework) {
     const files = await parseFiles(homework.files);
 
     const content = {
-        embeds: [{
-            title: `Travail en ${homework.subject} pour le <t:${dueDate.unix()}:d>`,
-            description: homework.description ? homework.description : "",
-            color: config.colors[homework.subject] ? config.colors[homework.subject] : homework.color,
-            fields: [{
-                name: "Donné le ",
-                value: `<t:${givenDate.unix()}:D>(<t:${givenDate.unix()}:R>)`,
-                // inline: true
-            },
-            {
-                name: "Pour le",
-                value: `<t:${dueDate.unix()}:D>(<t:${dueDate.unix()}:R>)`,
-                // inline: true
-            }
-            ]
-        }],
-        components: [new MessageActionRow().addComponents(new MessageButton()
+        embeds: [new EmbedBuilder()
+            .setTitle(`Travail en ${homework.subject} pour le <t:${dueDate.unix()}:d>`)
+            .setDescription(homework.description ? homework.description : "")
+            .setColor(config.colors[homework.subject] ? config.colors[homework.subject] : homework.color)
+            .addFields({ name: "Donné le ", value: `<t:${givenDate.unix()}:D>(<t:${givenDate.unix()}:R>)` })
+            .addFields({ name: "Pour le", value: `<t:${dueDate.unix()}:D>(<t:${dueDate.unix()}:R>)` })
+        ],
+        components: [new ActionRowBuilder().addComponents(new ButtonBuilder()
             .setCustomId("homework_done")
             .setLabel("Fait")
-            .setStyle("SUCCESS")
+            .setStyle(ButtonStyle.Success)
             .setEmoji("✅"))
         ],
         content: options.pingOnNewHomeWork ? `<@${config.notificationUserId}>` : null
@@ -130,12 +122,11 @@ async function getEmbed(homework) {
 
     if (files.files.length !== 0) content.files = files.files;
     if (files.parsedLinks) {
-        content.embeds[0].footer = { text: "\n\n ⚠️ Certains liens ne marcheront peut-être pas "
-          + "si vous n'êtes pas connecter. Veuillez vous connecter à Pronote directement pour y accéder." };
-        content.embeds[0].fields.push({
-            name: "Liens: ",
-            value: files.parsedLinks
+        content.embeds[0].setFooter({
+            text: "\n\n ⚠️ Certains liens ne marcheront peut-être pas "
+          + "si vous n'êtes pas connecter. Veuillez vous connecter à Pronote directement pour y accéder."
         });
+        content.embeds[0].addFields({ name: "Liens: ", value: files.parsedLinks });
     }
 
     return content;

@@ -1,3 +1,4 @@
+const { EmbedBuilder, Colors } = require("discord.js");
 const client = require("../index.js");
 const { db, config } = client;
 
@@ -24,42 +25,39 @@ module.exports = {
             if (global.moyenne !== m) {
                 if (global.moyenne < m) {
                     checkMoyenneUpdateForMatters(moyennes, async(changes) => {
-                        await channel.send({
-                            embeds: [{
-                                title: ":arrow_upper_right: Votre moyenne a augmenté !",
-                                description: `\`+${diff(global.moyenne, m)}\` \n`
-                                    + `\`Avant:\` ${global.moyenne}\n`
-                                    + `\`Aprés:\` ${m}\n\n`
-                                    + `\`Moyenne de la classe:\` ${mc}`
-                                    + (changes.length > 0 ?
-                                        changes.map(x => `\n\nChangements:\n\`${x.matter}\`: `
-                                           + `\`${x.old}\` -> \`${x.new}\``)
-                                            .join("")
-                                        : ""),
-                                color: "GREEN"
-                            }],
-                            content: content
+                        const embed = new EmbedBuilder()
+                            .setTitle(":arrow_upper_right: Votre moyenne a augmenté !")
+                            .setDescription(`\`+${diff(global.moyenne, m)}\` \n`
+                                + `\`Avant:\` ${global.moyenne}\n`
+                                + `\`Aprés:\` ${m}\n\n`
+                                + `\`Moyenne de la classe:\` ${mc}`
+                                + (changes.length > 0 ?
+                                    changes.map(x => `\n\nChangements:\n\`${x.matter}\`: `
+                                       + `\`${x.old}\` -> \`${x.new}\``)
+                                        .join("")
+                                    : ""))
+                            .setColor(Colors.Green);
+
+                        await channel.send({ embeds: [embed], content: content
                         });
                     });
                 }
                 if (global.moyenne > m) {
                     checkMoyenneUpdateForMatters(moyennes, async(changes) => {
-                        await channel.send({
-                            embeds: [{
-                                title: ":arrow_lower_right: Votre moyenne a baissé !",
-                                description: `\`-${diff(global.moyenne, m)}\` \n`
-                                    + `\`Avant:\` ${global.moyenne}\n`
-                                    + `\`Aprés:\` ${m}\n\n`
-                                    + `\`Moyenne de la classe:\` ${mc}`
-                                    + (changes.length > 0 ?
-                                        changes.map(x => `\n\nChangements:\n\`${x.matter}\`: `
-                                          + `\`${x.old}\` -> \`${x.new}\``)
-                                            .join("")
-                                        : ""),
-                                color: "RED"
-                            }],
-                            content: content
-                        });
+                        const embed = new EmbedBuilder()
+                            .setTitle(":arrow_lower_right: Votre moyenne a baissé !")
+                            .setDescription(`\`-${diff(global.moyenne, m)}\` \n`
+                                + `\`Avant:\` ${global.moyenne}\n`
+                                + `\`Aprés:\` ${m}\n\n`
+                                + `\`Moyenne de la classe:\` ${mc}`
+                                + (changes.length > 0 ?
+                                    changes.map(x => `\n\nChangements:\n\`${x.matter}\`: `
+                                      + `\`${x.old}\` -> \`${x.new}\``)
+                                        .join("")
+                                    : ""))
+                            .setColor(Colors.Red);
+
+                        await channel.send({ embeds: [embed], content: content });
                     });
                 }
 

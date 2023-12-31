@@ -26,16 +26,16 @@ async function login(keepAlive) {
 
     } catch (err) {
         if (err.code === errors.WRONG_CREDENTIALS.code) {
-            console.error("Mauvais identifiants");
+            throw new Error("Mauvais identifiants PRONOTE.");
         } else {
-            console.error(err);
+            throw err;
         }
     }
 }
 
 
 /**
-    * Login in a PronoteApi session
+    * Logout a PronoteApi session
      * @param {PronoteSession} session The PronoteAPI session to logout.
      *
      * @param {String} taskName The name of the task that the session belongs.

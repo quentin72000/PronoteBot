@@ -18,9 +18,11 @@ module.exports = async(client) => {
 
     client.on("ready", async() => {
         // Register for a single guild
-        await client.guilds.cache
-            .get(client.config.slashCommandGuildId)
-            .commands.set(arrayOfSlashCommands);
+        const guild = client.guilds.cache.get(client.config.slashCommandGuildId);
+        if (!guild) throw new Error("Guild not found or invalid guild ID in config file."
+         + "Make sure the bot is in the guild.");
+
+        await guild.commands.set(arrayOfSlashCommands);
     });
 };
 

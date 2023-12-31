@@ -12,8 +12,8 @@ client.on("ready", async() => {
         const task = require(`../tasks/${file}`);
 
         const taskConfig = client.config.tasksConfig?.find(currentTaskConfig =>
-            currentTaskConfig.name === task.task.name
-        );
+            currentTaskConfig.name === task.task.name);
+
         if (taskConfig && !taskConfig.enabled) {
             console.warn("Task", task.task.name, "is disabled in the config, skipping it.");
             continue;
