@@ -1,5 +1,5 @@
 const client = require("../index");
-const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
+const { EmbedBuilder, ApplicationCommandOptionType, Colors } = require("discord.js");
 
 client.on("interactionCreate", async(interaction) => {
     // Slash Command Handling
@@ -97,8 +97,8 @@ client.on("interactionCreate", async(interaction) => {
 function getHomeworkEmbed(error) {
     if (error) return new EmbedBuilder()
         .setTitle("Erreur: Devoir non trouvé !")
-        .setColor("RED");
+        .setColor(Colors.Red);
     return new EmbedBuilder()
         .setTitle("Devoir marqué comme fait !")
-        .setColor("GREEN");
+        .setColor(Colors.Green);
 }
