@@ -2,7 +2,7 @@ const client = require("../index.js");
 
 const { db,config } = client;
 
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, RESTJSONErrorCodes } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, RESTJSONErrorCodes, Colors } = require("discord.js");
 
 
 module.exports = {
@@ -78,13 +78,13 @@ module.exports = {
                                 embed.setTitle(`__Professeur absent__ : ${cours.teacher}`)
                                     .setDescription(`**Salle :** ${cours.room ? cours.room
                                         : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:F>`)
-                                    .setColor("RED");
+                                    .setColor(Colors.Red);
                             }
                             else {
                                 embed.setTitle(`__Cours annulé__ : ${cours.teacher}`)
                                     .setDescription(`**Salle :** ${cours.room ? cours.room
                                         : "Aucune salle précisé."}\n**Date :** <t:${Math.floor(coursDate / 1000)}:F>`)
-                                    .setColor("RED");
+                                    .setColor(Colors.Red);
                             }
 
                             absentChannel.send({ embeds: [embed], content: content });
