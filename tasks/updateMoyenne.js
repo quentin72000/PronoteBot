@@ -3,15 +3,14 @@ const client = require("../index.js");
 const { db, config } = client;
 
 module.exports = {
-    run: async function() {
+    name: "updateMoyenne",
+    run: async function(session) {
         const taskName = "updateMoyenne";
         console.log(`Running the ${taskName} task.`);
         const options = config.tasksConfig.find(e => e.name === taskName).options; // get the options of the task from the config
 
         const content = options.pingOnMoyenneUpdate ? `<@${config.notificationUserId}>` : null;
-        const session = await client.pronote.login();
         await session.marks().then((async(moyennes) => {
-            await client.pronote.logout(session, taskName);
 
             // m = moyenne générale perso, mc = moyenne de la classe
             const m = moyennes.averages.student;
@@ -70,12 +69,6 @@ module.exports = {
 
         }));
 
-    },
-    task: {
-        cron: "*/30 * * * *",
-        // cron: "* * * * *", // testing purposes
-        runOnStartup: false,
-        name: "updateMoyenne"
     }
 };
 

@@ -8,11 +8,11 @@ const { AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBu
 
 
 module.exports = {
-    run: async function() {
+    name: "checkHomeWork",
+    run: async function(session) {
         const taskName = "checkHomeWork";
 
         console.log(`Running the ${taskName} task.`);
-        const session = await client.pronote.login();
 
         const from = new Date();
         from.setDate(from.getDate() - 1);
@@ -63,13 +63,6 @@ module.exports = {
                 }
             }
         });
-        client.pronote.logout(session, taskName); // Loging out at the end because files can't be access if session is closed.
-    },
-    task: {
-        cron: "*/10 * * * *", // https://crontab.guru
-        // cron: "* * * * *", // testing purpose
-        runOnStartup: true, // if true, the task will be run on startup of the bot
-        name: "checkHomeWork"
     }
 };
 

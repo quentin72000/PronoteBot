@@ -2,15 +2,16 @@ const client = require("../index.js");
 
 const { db,config } = client;
 
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, RESTJSONErrorCodes, Colors } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle,
+    RESTJSONErrorCodes, Colors } = require("discord.js");
 
 
 module.exports = {
-    run: async function() {
+    name: "updateTimetable",
+    run: async function(session) {
         const taskName = "updateTimetable";
 
         console.log(`Running the ${taskName} task.`);
-        const session = await client.pronote.login();
 
         const options = config.tasksConfig.find(e => e.name === taskName).options; // get the options of the task
         const content = options.pingOnTimetableChange ? `<@${config.notificationUserId}>` : null;
@@ -24,7 +25,6 @@ module.exports = {
         const absentChannel = await client.channels.cache.get(config.channels.timetableChange);
 
         await session.timetable().then(async(timetable) => {
-            await client.pronote.logout(session, taskName);
 
             // Timetable embed update part
             const timetableEmbed = new EmbedBuilder()
@@ -106,12 +106,6 @@ module.exports = {
             }
         });
 
-    },
-    task: {
-        cron: "*/10 * * * *", // https://crontab.guru
-        // cron: "* * * * *", // testing purpose
-        runOnStartup: true, // if true, the task will be run on startup of the bot
-        name: "updateTimetable"
     }
 };
 

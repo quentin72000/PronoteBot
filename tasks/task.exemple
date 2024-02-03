@@ -3,15 +3,10 @@ const { db,config } = client;
 
 
 module.exports = {
-    run: async function() {
+    name: "[taskName]",
+    run: async function(session) {
         let taskName = "[taskName]";
         console.log(`Running the ${taskName} task.`);
-
-    },
-    task: {
-        cron: "", // https://crontab.guru
-        // cron: "* * * * *", // testing purpose
-        runOnStartup: false, // if true, the task will be run on startup of the bot
-        name: ""
+        // Your code here
     }
 };

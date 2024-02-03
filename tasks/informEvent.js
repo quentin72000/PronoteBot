@@ -3,7 +3,8 @@ const client = require("../index.js");
 const { db,config } = client;
 
 module.exports = {
-    run: async function() {
+    name: "informEvent",
+    run: async function(session) {
         const taskName = "informEvent";
         console.log(`Running the ${taskName} task.`);
 
@@ -11,7 +12,6 @@ module.exports = {
 
         const channel = client.channels.cache.get(client.config.channels.announcement);
 
-        const session = await client.pronote.login();
         const params = session.params;
 
 
@@ -194,15 +194,6 @@ module.exports = {
 
         }
 
-        await client.pronote.logout(session, taskName);
-
-
-    },
-    task: {
-        cron: "0 8 * * *", // Once a day at 8:00
-        // cron: "* * * * *", // testing purpose
-        runOnStartup: true, // if true, the task will be run on startup of the bot
-        name: "informEvent"
     }
 };
 

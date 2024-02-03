@@ -41,9 +41,8 @@ async function login(keepAlive) {
      * @param {String} taskName The name of the task that the session belongs.
      */
 
-async function logout(session, taskNameOrCommand) {
+async function logout(session, firer) {
     await session.logout().then(() => {
-        console.log(`Logged out of session ${session.id} of `
-            + `the ${taskNameOrCommand.startsWith("/") ? "command" : "task"} ${taskNameOrCommand}.`);
+        console.log(`Logged out of session ${session.id} of ` + firer + ".");
     });
 }
