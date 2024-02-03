@@ -6,7 +6,7 @@
 
 ![PronoteBot GitHub package.json version](https://img.shields.io/github/package-json/v/quentin72000/PronoteBot)
 ![GitHub last commit](https://img.shields.io/github/last-commit/quentin72000/PronoteBot)
-![Maintenance](https://img.shields.io/maintenance/yes/2023)
+![Maintenance](https://img.shields.io/maintenance/yes/2024)
 ![discord.js used version](https://img.shields.io/github/package-json/dependency-version/quentin72000/PronoteBot/discord.js)
 ![GitHub Repo stars](https://img.shields.io/github/stars/quentin72000/PronoteBot?style=social)
 ## Project Screenshots:
