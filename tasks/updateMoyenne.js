@@ -1,5 +1,6 @@
 const { EmbedBuilder, Colors } = require("discord.js");
 const client = require("../index.js");
+const { getCurrentTrimester } = require("../utils/pronoteUtils.js");
 const { db, config } = client;
 
 module.exports = {
@@ -15,7 +16,7 @@ module.exports = {
             // m = moyenne générale perso, mc = moyenne de la classe
             const m = moyennes.averages.student;
             const mc = moyennes.averages.studentClass;
-
+            const currentTrimester = getCurrentTrimester(session);
             await initializeMatieres(moyennes, m, mc);
             const channel = client.channels.cache.get(client.config.channels.moyenne);
 
@@ -28,13 +29,10 @@ module.exports = {
                             .setTitle(":arrow_upper_right: Votre moyenne a augmenté !")
                             .setDescription(`\`+${diff(global.moyenne, m)}\` \n`
                                 + `\`Avant:\` ${global.moyenne}\n`
-                                + `\`Aprés:\` ${m}\n\n`
+                                + `\`Après:\` ${m}\n\n`
                                 + `\`Moyenne de la classe:\` ${mc}`
-                                + (changes.length > 0 ?
-                                    changes.map(x => `\n\nChangements:\n\`${x.matter}\`: `
-                                       + `\`${x.old}\` -> \`${x.new}\``)
-                                        .join("")
-                                    : ""))
+                                + getChangesString(changes))
+                            .setFooter({ text: "Période: " + currentTrimester.name })
                             .setColor(Colors.Green);
 
                         await channel.send({ embeds: [embed], content: content
@@ -47,13 +45,9 @@ module.exports = {
                             .setTitle(":arrow_lower_right: Votre moyenne a baissé !")
                             .setDescription(`\`-${diff(global.moyenne, m)}\` \n`
                                 + `\`Avant:\` ${global.moyenne}\n`
-                                + `\`Aprés:\` ${m}\n\n`
+                                + `\`Après:\` ${m}\n\n`
                                 + `\`Moyenne de la classe:\` ${mc}`
-                                + (changes.length > 0 ?
-                                    changes.map(x => `\n\nChangements:\n\`${x.matter}\`: `
-                                      + `\`${x.old}\` -> \`${x.new}\``)
-                                        .join("")
-                                    : ""))
+                                + getChangesString(changes))
                             .setColor(Colors.Red);
 
                         await channel.send({ embeds: [embed], content: content });
@@ -132,4 +126,9 @@ async function checkMoyenneUpdateForMatters(moyennes, callback) {
 
     });
     callback(changes);
+}
+
+function getChangesString(changes) {
+    if (!changes || changes.length === 0) return "";
+    return "\n\nChangements:" + changes.map(x => `\n\`${x.matter}\`: \`${x.old}\` -> \`${x.new}\``).join("\n");
 }

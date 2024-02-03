@@ -16,7 +16,7 @@ module.exports = {
         const options = config.tasksConfig.find(e => e.name === taskName).options; // get the options of the task
         const content = options.pingOnTimetableChange ? `<@${config.notificationUserId}>` : null;
 
-        // Taked and edited from https://github.com/Gamers-geek/PronoteBot/blob/master/events/ready.js
+        // Taken and edited from https://github.com/Gamers-geek/PronoteBot/blob/master/events/ready.js
 
         const timetableChannel = await client.channels.cache.get(config.channels.timetable);
         if (!timetableChannel) throw new Error("Can't find timetable channel. Please check your config.");

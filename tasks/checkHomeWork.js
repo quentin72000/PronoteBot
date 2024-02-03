@@ -23,7 +23,7 @@ module.exports = {
                 const value = homeworks[i];
 
                 // eslint-disable-next-line @stylistic/quotes
-                const description = value.description.replaceAll('"', '""').replaceAll("'", "''"); // Prevent non escaped caracter error.
+                const description = value.description.replaceAll('"', '""').replaceAll("'", "''"); // Prevent non escaped character error.
 
                 const result = await db.prepare("SELECT * FROM homework WHERE id=?").get(value.id);
                 if (!result) {

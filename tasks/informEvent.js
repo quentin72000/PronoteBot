@@ -93,7 +93,7 @@ module.exports = {
                 }
 
 
-                if ((diffInDays <= 3)) { // If the holidays are "short" holidays, supose it's a national holidays (férié)
+                if ((diffInDays <= 3)) { // If the holidays are "short" holidays, assume it's a national holidays (férié)
                     if (isBefore2Days(start) && result.reminder_before_start === 0) {
                         const embed = new EmbedBuilder()
                             .setTitle(diffInDays > 0 ?

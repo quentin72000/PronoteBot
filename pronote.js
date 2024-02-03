@@ -19,7 +19,7 @@ async function login(keepAlive) {
             console.log(error);
         });
         if (session.user !== null && session.user !== undefined) {
-            console.log(`Succesfully logged as ${session.user.name} in ${session.user.studentClass.name}. `
+            console.log(`Successfully logged as ${session.user.name} in ${session.user.studentClass.name}. `
                 + `Session id: ${session.id} \n`);
             return session;
         }

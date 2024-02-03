@@ -57,13 +57,13 @@ module.exports = {
         if (errorOccurred) {
             return await interaction.editReply({ content: "", embeds: [new EmbedBuilder()
                 .setTitle("Erreur.")
-                .setDescription("Une erreur est survenue lors de l'éxécution de la tache.")
+                .setDescription("Une erreur est survenue lors de l’exécution de la tache.")
                 .setColor("#FF0000")
             ] });
         }
         await interaction.editReply({ content: "", embeds: [new EmbedBuilder()
             .setTitle("Tache exécutée.")
-            .setDescription("La tache a été éxécutée avec succès.")
+            .setDescription("La tache a été exécutée avec succès.")
             .setColor("#00FF00")
         ] });
     }
